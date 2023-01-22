@@ -2,6 +2,8 @@
 #include "graphDumpTree.h"
 #include "myStrcmp.h"
 
+bool IS_MAIN = false;
+
 //-------------------------------------------------------------building a tree-------------------------------------------------------
 
 node_t * createNodeWithNum (elem_t num)
@@ -9,13 +11,13 @@ node_t * createNodeWithNum (elem_t num)
 	node_t * node = (node_t *) calloc (1, sizeof(node_t));
 	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
 
-	node->type = NUM_T;
+	node->isNum = true;
 	node->elem = num;
 
 	return node;
 }
 
-node_t * createNodeWithOperation (int operation, node_t * nodeL, node_t * nodeR) //enum operationType operation
+node_t * createNodeWithOperation (enum operation oper, node_t * nodeL, node_t * nodeR)
 {
 	MY_ASSERT (nodeL == nullptr, "There is no access to the left node");
 	MY_ASSERT (nodeR == nullptr, "There is no access to the right node");
@@ -23,50 +25,38 @@ node_t * createNodeWithOperation (int operation, node_t * nodeL, node_t * nodeR)
 	node_t * node = (node_t *) calloc (1, sizeof(node_t));
 	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
 
-	if (operation != OP_SUB 		&&
-		operation != OP_ADD 		&&
-		operation != OP_DIV 		&&
-		operation != OP_MUL 		&&
-		operation != OP_DEG 		&&
-		operation != OP_ASSIGN 		&&
-		operation != OP_LOG_AND 	&&
-		operation != OP_LOG_OR 		&&
-		operation != OP_LESS_OR_EQ 	&&
-		operation != OP_GR_OR_EQ)
+	if (oper != OP_SUB			&&
+		oper != OP_ADD			&&
+		oper != OP_DIV			&&
+		oper != OP_MUL			&&
+		oper != OP_DEG			&&
+		oper != OP_ASSIGN		&&
+		oper != OP_LOG_AND		&&
+		oper != OP_LOG_OR 		&&
+		oper != OP_LESS_OR_EQ 	&&
+		oper != OP_GR_OR_EQ		&&
+		oper != OP_CELEBRATION	&&
+		oper != OP_NOT_EQUAL	&&
+		oper != OP_DENIAL)
 	{
 		MY_ASSERT (1, "Incorrect operation type specified");
 	}
 
-	if (operation == OP_ASSIGN)
-	{
-		node->type = OPER_T;
-		node->op_t = OP_ASSIGN;
-		node->left = nodeL;
-		nodeL->parent = node;
-		node->right = nodeR;
-		nodeR->parent = node;
-	}
-	else
-	{
-		node->left = nodeL;
-		node->right = nodeR;
-		node->type = OPER_T;
-		node->op_t = (operationType) operation;
-
-		nodeL->parent = node;
-		nodeR->parent = node;
-	}
+	node->left = nodeL;
+	node->right = nodeR;
+	nodeL->parent = node;
+	nodeR->parent = node;
+	node->op_t = oper;
 	
-
 	return node;
 }
 
-node_t * createNodeInstruction (enum nodeType type, node_t * nodeL, node_t * nodeR)
+node_t * createKeyNode (enum keyword type, node_t * nodeL, node_t * nodeR)
 {
 	node_t * node = (node_t *) calloc (1, sizeof(node_t));
 	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
 
-	node->type = type;
+	node->key_t = type;
 
 	if (nodeR != nullptr)
 	{
@@ -83,67 +73,34 @@ node_t * createNodeInstruction (enum nodeType type, node_t * nodeL, node_t * nod
 	return node;
 }
 
-node_t * createTerminalNode (enum nodeType type, node_t * condition, node_t * nodeL, node_t * nodeR)
-{
-	node_t * node = (node_t *) calloc (1, sizeof(node_t));
-	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
-
-	node->type = type;
-
-	if (type == IF_T) //TODO: delete copypaste
-	{
-		MY_ASSERT (condition == nullptr, "There is no access to condition in if");
-		node_t * actions = createNodeInstruction (DECISION_T, nodeL, nodeR); 
-
-		node->left = condition;
-		condition->parent = node;
-		
-		node->right = actions;
-		actions->parent = node;
-	}
-	else if (type == WHILE_T)
-	{
-		MY_ASSERT (condition == nullptr, "There is no access to condition in while");
-
-		node->left = condition;
-		condition->parent = node;
-		
-		node->right = nodeR;
-		nodeR->parent = node;
-	}
-
-	return node;
-}
-
 node_t * createNodeWithVariable (char * variableName)
 {
 	MY_ASSERT (variableName == nullptr, "There is no access to the variable name");
 	node_t * node = (node_t *) calloc (1, sizeof(node_t));
 	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
 
-	node->type = VAR_T;
-	node->varName = variableName;
+	node->id_t = ID_VAR;
+	node->name = variableName;
 
 	return node;
 }
 
-node_t * createNodeWithFunction (const char * nameFunction, node_t * leftDescendant)
+node_t * createNodeWithFunction (char * funcName)
 {
-	if ((myStrcmp (nameFunction, "sin") != 0) && (myStrcmp (nameFunction, "cos") != 0) &&
-		(myStrcmp (nameFunction, "tg") != 0) && (myStrcmp (nameFunction, "ctg") != 0) &&
-		(myStrcmp (nameFunction, "ln") != 0))
-	{
-		MY_ASSERT (1, "Incorrect function name");
-		return nullptr;
-	}
-
+	MY_ASSERT (funcName == nullptr, "There is no access to the variable name");
 	node_t * node = (node_t *) calloc (1, sizeof(node_t));
 	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
 
-	node->type = FUNC_T;
-	node->nameFunc = nameFunction;
-	node->left = leftDescendant;
-	leftDescendant->parent = node;
+	node->id_t = ID_FUNC;
+	node->name = funcName;
+
+	if ((strcmp (funcName, "main") == 0))
+	{
+		MY_ASSERT (IS_MAIN == true, "There should be only one main function");
+		node->key_t = MAIN_T;
+		IS_MAIN = true;
+	}
+
 	return node;
 }
 

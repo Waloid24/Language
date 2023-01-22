@@ -5,6 +5,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "graphDumpTree.h"
+#include "textTree.h"
 
 
 #endif

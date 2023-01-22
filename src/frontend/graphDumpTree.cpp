@@ -55,7 +55,7 @@ void writeNodeToDotFile (const node_t * node, FILE * graphicDump)
 	MY_ASSERT (node == nullptr, "There is no access to the node");
 	MY_ASSERT (graphicDump == nullptr, "There is no access to the file for dump");
 
-	if (node->type == OPER_T)
+	if (node->op_t != NO_OP)
 	{
 		if (node->op_t == OP_GR_OR_EQ)
 		{
@@ -73,38 +73,70 @@ void writeNodeToDotFile (const node_t * node, FILE * graphicDump)
 		{
 			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, "||");
 		}
+		else if (node->op_t == OP_CELEBRATION)
+		{
+			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, "==");
+		}
+		else if (node->op_t == OP_NOT_EQUAL)
+		{
+			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, "!=");
+		}
 		else
 		{
 			dumplineTree ("\t node%p [label=\"%c\", shape=oval];\n", node, node->op_t);
 		}
 	}
-	else if (node->type == VAR_T || node->type == CONST_T)
+	else if (node->id_t == ID_VAR)
 	{
-		dumplineTree ("\t node%p [label=\"%s\", penwidth=3, shape=rect, color=darkslategray];\n", node, node->varName);
+		dumplineTree ("\t node%p [label=\"%s\", penwidth=3, shape=rect, color=darkslategray];\n", node, node->name);
 	}
-	else if (node->type == STATEMENT_T)
+	else if (node->key_t == PARAM_T)
+	{
+		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "parameter");
+	}
+	else if (node->key_t == RETURN_T)
+	{
+		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "return");
+	}
+	else if (node->key_t == DEFINE_T)
+	{
+		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "define");
+	}
+	else if (node->key_t == INITIALIZER_T)
+	{
+		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "initializer");
+	}
+	else if (node->key_t == FUNC_T)
+	{
+		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "function");
+	}
+	else if (node->key_t == STATEMENT_T)
 	{
 		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "statement");
 	}
-	else if (node->type == DECISION_T)
+	else if (node->key_t == DECISION_T)
 	{
 		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "decision");
 	}
-	else if (node->type == WHILE_T)
+	else if (node->key_t == CALL_T)
+	{
+		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "call");
+	}
+	else if (node->key_t == WHILE_T)
 	{
 		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "while");
 	}
-	else if (node->type == IF_T)
+	else if (node->key_t == IF_T)
 	{
 		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "if");
 	}
-	else if (node->type == NUM_T)
+	else if (node->isNum == true)
 	{
 		dumplineTree ("\t node%p [label=\"%lf\", penwidth=3, shape=rect, color=darkgreen];\n", node, node->elem);
 	}
 	else
 	{
-		dumplineTree ("\t node%p [label=\"{ %s | %p }\"];\n", node, node->nameFunc, node);
+		dumplineTree ("\t node%p [label=\"%s\"];\n", node, node->name);
 	}
 
 	if (node->left != nullptr)

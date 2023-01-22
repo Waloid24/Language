@@ -67,7 +67,7 @@ static char * skipSpace(char *str)
 {
     MY_ASSERT(str == nullptr, "the pointer to the string is null");
 
-    while (*str == ' ' || *str == '\t' || *str == '\n')
+    while (*str == ' ' || *str == '\t' || *str == '\n' || *str == ',')
     {
         if (str[0] == '_')
         {
@@ -86,7 +86,7 @@ static char * getWord(char * str)
     char * tmp = str;
     size_t lengthWord = 0;
 
-    while (*str != ' ' && *str != '\t' && *str != '\n' && *str != '\0')
+    while (*str != ' ' && *str != '\t' && *str != '\n' && *str != '\0' && *str != ',')
     {
         lengthWord++;
         str++;
@@ -110,7 +110,7 @@ static void setToken (char *word, token_t *tokens, size_t ip)
 {
     MY_ASSERT(word == nullptr, "There is no access to this word");
     MY_ASSERT(word[0] == '_', "Uncorrect symbol: \'_\' should not be at the beginning of the word");
-    MY_ASSERT((word[0] >= 48 && word[0] <= 57) && ((word[1] <= 48 || word[1] >= 57)) && strlen(word) > 1, "Uncorrect ...");
+    MY_ASSERT((word[0] >= 48 && word[0] <= 57) && ((word[1] < 48 || word[1] > 57)) && strlen(word) > 1, "Uncorrect ...");
 
     #define DEF_CMD(nameCmd, value, terminal)   \
         if (strcmp (word, terminal) == 0)       \
@@ -131,8 +131,6 @@ static void setToken (char *word, token_t *tokens, size_t ip)
         tokens[ip].type = TYPE_ID;
         tokens[ip].u1.id = word;
     }
-
-    printf ("tokens[%zu].type = %d\n", ip, tokens[ip].type);
 
     #undef DEF_CMD
 }
@@ -158,8 +156,7 @@ retLex_t getTokens (char * code)
         if (i == (tmpStandartSize - 1))
         {
             tmpStandartSize *= 2;
-            tokens = (token_t *)realloc(tokens, tmpStandartSize * sizeof(token_t)); //ok
-            printf ("tmpStandartSize = %zu\n", tmpStandartSize);
+            tokens = (token_t *)realloc(tokens, tmpStandartSize * sizeof(token_t)); 
         }
 
         code = skipSpace(code);
@@ -169,7 +166,6 @@ retLex_t getTokens (char * code)
             free(word);
             break;
         }
-        printf ("word = %s, i = %zu\n", word, i);
         setToken(word, tokens, i);
         code = code + strlen(word);
         numTokens++;
@@ -180,10 +176,17 @@ retLex_t getTokens (char * code)
         }
     }
 
+    numTokens++;
+    if (numTokens == (tmpStandartSize - 1))
+    {
+        tmpStandartSize++;
+        tokens = (token_t *)realloc(tokens, tmpStandartSize * sizeof(token_t)); //ok
+    }
+    tokens[numTokens-1].type = TYPE_END_TOKENS;
+
     result.tokens  = tokens;
     result.nTokens = numTokens;
 
-    printf ("result.tokens = %p\n", result.tokens);
     for (size_t i = 0; i < numTokens; i++)
     {
         fprintf (logfile, "tokens[%zu]\n", i);

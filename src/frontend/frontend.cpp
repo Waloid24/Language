@@ -14,19 +14,18 @@ int main (int argc, char * argv[])
     char * code = getCode (argv[1]);
 
     retLex_t tokenResult = getTokens (code);
-    printf ("tokenResult.tokens = %p\n", tokenResult.tokens);
 
     token_t * tmp = tokenResult.tokens;
 
-    node_t * node = getGeneral (&tmp);
+    node_t * node = getGeneral(&tmp);
 
     graphicDumpTree (node);
+
+    textTree (node);
 
     free (code);
 
     deleteTree (node);
-
-    printf ("tokenResult.nTokens = %zu\n", tokenResult.nTokens);
 
     for (size_t i = 0; i < tokenResult.nTokens; i++)
     {
@@ -36,6 +35,5 @@ int main (int argc, char * argv[])
         }
     }
     free (tokenResult.tokens);
-
     return 0;
 }

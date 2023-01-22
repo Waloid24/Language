@@ -23,37 +23,72 @@ static node_t * getPrimary (token_t ** tokens);
 
 static void checkSemicolon (token_t ** tokens);
 static node_t ** increaseMemory (node_t ** ptr, size_t * size);
-static void * allocateMemory (size_t numElem, size_t sizeElem);
+static void   * allocateMemory (size_t numElem, size_t sizeElem);
 static node_t * createParams (token_t ** tokens);
+static node_t * getId (token_t ** tokens);
+static node_t * getFunc (token_t ** tokens);
 
 node_t * getGeneral (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
 
-    node_t * node = nullptr;
+    node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
 
     if (((*tokens)+1)->type != TYPE_O_BRACKET)
     {
-        node = getAssign (tokens);
-        return node;
+        node_t * node = getAssign (tokens);
+        multipleInstructions[0] = createKeyNode (STATEMENT_T, nullptr, node);
     }
     else if (((*tokens)+1)->type == TYPE_O_BRACKET)
     {
-        node = getDefine (tokens);
-        return node;
+        multipleInstructions[0] = getDefine (tokens);
     }
     else
     {
         MY_ASSERT (1, "Wrong command");
         return nullptr;
     }
+
+    size_t i = 0;
+    for (; (*tokens)->type != TYPE_END_TOKENS; i++)
+    {
+        if (i == STANDART_NUM_OF_INSTRUCTION-1)
+        {
+            multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
+        }
+        node_t * node = nullptr;
+        if (((*tokens)+1)->type != TYPE_O_BRACKET)
+        {
+            node_t * supportNode = getAssign (tokens);
+            node = createKeyNode (STATEMENT_T, nullptr, supportNode);
+        }
+        else if (((*tokens)+1)->type == TYPE_O_BRACKET)
+        {
+            node = getDefine (tokens);
+        }
+        else
+        {
+            MY_ASSERT (1, "Wrong command");
+            return nullptr;
+        }
+        multipleInstructions[i]->parent = node;
+        node->left = multipleInstructions[i];
+        multipleInstructions[i+1] = node;
+    }
+
+    node_t * finalNode = copyNode(multipleInstructions[i]);
+
+    deleteTree (multipleInstructions[i]);
+    free (multipleInstructions);
+
+    return finalNode;
 }
 
 static node_t * getDefine (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
 
-    node_t * nameFunc = getPrimary (tokens);
+    node_t * funcName = getFunc (tokens);
 
     if ((*tokens)->type != TYPE_O_BRACKET)
     {
@@ -63,21 +98,26 @@ static node_t * getDefine (token_t ** tokens)
 
     node_t ** multipleParams = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
 
+    size_t i = 0;
     if ((*tokens)->type != TYPE_C_BRACKET) 
     {
         multipleParams[0] = createParams (tokens);
 
-        for (size_t i = 0; (*tokens)->type != TYPE_C_BRACKET; i++)
+        for ( ; (*tokens)->type != TYPE_C_BRACKET; i++)
         {
             if (i == STANDART_NUM_OF_INSTRUCTION-1)
             {
                 multipleParams = increaseMemory (multipleParams, &STANDART_NUM_OF_INSTRUCTION);
             }
             node_t * node = createParams (tokens);
-            multipleParams[i]->left = node;
-            node->parent = multipleParams[i];
+            multipleParams[i]->parent = node;
+            node->left = multipleParams[i];
             multipleParams[i+1] = node;
         }
+        (*tokens)++;
+    }
+    else
+    {
         (*tokens)++;
     }
 
@@ -90,23 +130,28 @@ static node_t * getDefine (token_t ** tokens)
     node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
     multipleInstructions[0] = getStatement (tokens);
 
-    for (size_t i = 0; (*tokens)->type != TYPE_C_F_BRACKET; i++)
+    size_t j = 0;
+    for (; (*tokens)->type != TYPE_C_F_BRACKET; j++)
     {
-        if (i == STANDART_NUM_OF_INSTRUCTION-1)
+        if (j == STANDART_NUM_OF_INSTRUCTION-1)
         {
             multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
         }
         node_t * node = getStatement (tokens);
-        multipleInstructions[i]->left = node;
-        node->parent = multipleInstructions[i];
-        multipleInstructions[i+1] = node;
+        multipleInstructions[j]->parent = node;
+        node->left = multipleInstructions[j];
+        multipleInstructions[j+1] = node;
     }
     (*tokens)++;
 
-    node_t * funcSignature = createNodeInstruction (FUNC_T, nameFunc, multipleParams[0]);
-    node_t * headNode = createNodeInstruction (DEFINE_T, funcSignature, multipleInstructions[0]);
+    node_t * funcSignature  = createKeyNode (FUNC_T, funcName, multipleParams[i]);
+    node_t * headNode       = createKeyNode (DEFINE_T, funcSignature, multipleInstructions[j]);
+    node_t * supportNode    = createKeyNode (STATEMENT_T, nullptr, headNode);
 
-    return headNode;
+    free (multipleParams);
+    free (multipleInstructions);
+
+    return supportNode;
 }
 
 static node_t * getStatement (token_t ** tokens)
@@ -117,12 +162,10 @@ static node_t * getStatement (token_t ** tokens)
 
     if ((*tokens)->type == TYPE_IF)
     {
-        printf ("\033[31m erroneous entry1 \033[0m \n");
         node = getConditional (tokens);
     }
     else if ((*tokens)->type == TYPE_WHILE)
     {
-        printf ("\033[31m erroneous entry2 \033[0m \n");
         node = getCycle (tokens);
     }
     else if ((*tokens + 1)->type == TYPE_ASSIGN)
@@ -135,11 +178,10 @@ static node_t * getStatement (token_t ** tokens)
     }
     else
     {
-        printf ("\033[31m erroneous entry3 \033[0m \n");
         node = getExpression (tokens);
     }
 
-    node_t * headNode = createNodeInstruction (STATEMENT_T, nullptr, node);
+    node_t * headNode = createKeyNode (STATEMENT_T, nullptr, node);
 
     return headNode;
 }
@@ -151,11 +193,11 @@ static node_t * getAssign (token_t ** tokens)
     node_t * node = getPrimary (tokens);
 
     (*tokens)++; //to skip a "="
-    MY_ASSERT (node->type != VAR_T, "It is necessary to have a variable before the assignment sign");
+    MY_ASSERT (node->id_t != ID_VAR, "It is necessary to have a variable before the assignment sign");
     
-    printf ("in getAssign (*tokens)->type = %d\n", (*tokens)->type);
     node_t * node_1 = getExpression (tokens);
-    node_t * headNode = createNodeWithOperation (OP_ASSIGN, node, node_1);
+    node_t * supportNode = createKeyNode (INITIALIZER_T, nullptr, node_1);
+    node_t * headNode = createNodeWithOperation (OP_ASSIGN, node, supportNode);
 
     checkSemicolon (tokens);
 
@@ -169,7 +211,7 @@ static node_t * getTerminational (token_t ** tokens)
     (*tokens)++; //skip 'return'
     node_t * node = getExpression (tokens);
     checkSemicolon (tokens);
-    node_t * headNode = createNodeInstruction (RETURN_T, nullptr, node);
+    node_t * headNode = createKeyNode (RETURN_T, nullptr, node);
 
     return headNode;
 }
@@ -203,20 +245,28 @@ static node_t * getCycle (token_t ** tokens)
     node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
     multipleInstructions[0] = getStatement (tokens);
 
-    for (size_t i = 0; (*tokens)->type != TYPE_C_F_BRACKET; i++)
+    size_t i = 0;
+    for (; (*tokens)->type != TYPE_C_F_BRACKET; i++)
     {
         if (i == STANDART_NUM_OF_INSTRUCTION-1)
         {
             multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
         }
         node_t * node = getStatement (tokens);
-        multipleInstructions[i]->left = node;
-        node->parent = multipleInstructions[i];
+        multipleInstructions[i]->parent = node;
+        node->left = multipleInstructions[i];
         multipleInstructions[i+1] = node;
     }
     (*tokens)++;
 
-    node_t * headNode = createTerminalNode (WHILE_T, condition, nullptr, multipleInstructions[0]);
+    node_t * headNode = (node_t *) calloc (1, sizeof(node_t));
+	MY_ASSERT (headNode == nullptr, "Unable to allocate new memory");
+
+	headNode->key_t = WHILE_T;
+    headNode->left = condition;
+    condition->parent = headNode;
+    headNode->right = multipleInstructions[i];
+    multipleInstructions[i]->parent = headNode;
 
     free (multipleInstructions);
 
@@ -226,7 +276,6 @@ static node_t * getCycle (token_t ** tokens)
 static node_t * getConditional (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
-    printf ("\033[31m erroneous entry5 \033[0m \n");
 
     (*tokens)++;
     if ((*tokens)->type != TYPE_O_BRACKET)
@@ -243,29 +292,28 @@ static node_t * getConditional (token_t ** tokens)
     }
     (*tokens)++;
 
-    if ((*tokens)->type != TYPE_O_F_BRACKET)
-    {
-        MY_ASSERT (1, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
-    }
+    MY_ASSERT ((*tokens)->type != TYPE_O_F_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
     (*tokens)++;
 
     node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
     multipleInstructions[0] = getStatement (tokens);
 
-    for (size_t i = 0; (*tokens)->type != TYPE_C_F_BRACKET; i++)
+    size_t i = 0;
+    for (; (*tokens)->type != TYPE_C_F_BRACKET; i++)
     {
         if (i == STANDART_NUM_OF_INSTRUCTION-1)
         {
             multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
         }
         node_t * node = getStatement (tokens);
-        multipleInstructions[i]->left = node;
-        node->parent = multipleInstructions[i];
+        multipleInstructions[i]->parent = node;
+        node->left = multipleInstructions[i];
         multipleInstructions[i+1] = node;
     }
     (*tokens)++;
 
     node_t ** multipleInstructionsElse = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
+    size_t j = 0;
     if ((*tokens)->type == TYPE_ELSE)
     {
         (*tokens)++;
@@ -277,26 +325,34 @@ static node_t * getConditional (token_t ** tokens)
 
         multipleInstructionsElse[0] = getStatement (tokens);
 
-        for (size_t i = 0; (*tokens)->type != TYPE_C_F_BRACKET; i++)
+        for (; (*tokens)->type != TYPE_C_F_BRACKET; j++)
         {
-            if (i == STANDART_NUM_OF_INSTRUCTION-1)
+            if (j == STANDART_NUM_OF_INSTRUCTION-1)
             {
                 multipleInstructionsElse = increaseMemory (multipleInstructionsElse, &STANDART_NUM_OF_INSTRUCTION);
             }
             node_t * node = getStatement (tokens);
-            multipleInstructionsElse[i]->left = node;
-            node->parent = multipleInstructionsElse[i];
-            multipleInstructionsElse[i+1] = node; //TODO: it is necessary to correctly add the left nodes to statement
+            multipleInstructionsElse[j]->parent = node;
+            node->left = multipleInstructionsElse[j];
+            multipleInstructionsElse[j+1] = node;
         }
         (*tokens)++;
     }
 
-    node_t * headNode = createTerminalNode (IF_T, condition, multipleInstructions[0], multipleInstructionsElse[0]);
+    node_t * headNode = (node_t *) calloc (1, sizeof(node_t));
+	MY_ASSERT (headNode == nullptr, "Unable to allocate new memory");
+
+	headNode->key_t = IF_T;
+
+    node_t * actions = createKeyNode (DECISION_T, multipleInstructions[i], multipleInstructionsElse[j]); 
+    headNode->left = condition;
+    condition->parent = headNode;
+    
+    headNode->right = actions;
+    actions->parent = headNode;
 
     free (multipleInstructions);
     free (multipleInstructionsElse);
-
-    graphicDumpTree (headNode);
 
     return headNode;
 }
@@ -309,7 +365,6 @@ static node_t * getExpression (token_t ** tokens)
 
     if ((*tokens)->type == TYPE_LOG_AND)
     {
-        printf ("\033[31m erroneous entry6 \033[0m \n");
         (*tokens)++; //to skip a logical symbols
         node_t * node_2 = getBoolean (tokens);
         node_t * headNode = createNodeWithOperation (OP_LOG_AND, node_1, node_2);
@@ -318,7 +373,6 @@ static node_t * getExpression (token_t ** tokens)
     }
     else if ((*tokens)->type == TYPE_LOG_OR)
     {
-        printf ("\033[31m erroneous entry7 \033[0m \n");
         (*tokens)++; //to skip a logical symbols
         node_t * node_2 = getBoolean (tokens);
         node_t * headNode = createNodeWithOperation (OP_LOG_OR, node_1, node_2);
@@ -337,40 +391,71 @@ static node_t * getBoolean (token_t ** tokens)
 
     node_t * node_1 = getArithmetic (tokens);
 
-    if ((*tokens)->type == TYPE_GR_OR_EQ || (*tokens)->type == TYPE_LESS_OR_EQ)
+    if ((*tokens)->type == TYPE_GR_OR_EQ || (*tokens)->type == TYPE_LESS_OR_EQ || 
+        (*tokens)->type == TYPE_LESS || (*tokens)->type == TYPE_GR ||
+        (*tokens)->type == TYPE_CELEBRATION || (*tokens)->type == TYPE_NOT_EQUAL)
     {
-        printf ("\033[31m erroneous entry8 \033[0m \n");
+        int nodeType = (*tokens)->type;
         (*tokens)++; //to skip a comparison symbols
 
         node_t * node_2 = getArithmetic (tokens);
+        node_t * headNode = nullptr;
 
-        node_t * headNode = createNodeWithOperation (TYPE_GR_OR_EQ, node_1, node_2); 
+        #define BOOL_CMDS(cmd, oper)                                        \
+            if (nodeType == cmd)                                            \
+            {                                                               \
+                headNode = createNodeWithOperation (oper, node_1, node_2);  \
+            }                                                               \
+            else
+
+        #include "boolCmds.h"
+        {
+            return nullptr;
+        }
         return headNode;
     }
-
     return node_1;
 }
 
 static node_t * getArithmetic (token_t ** tokens)
 {
-    MY_ASSERT (tokens == nullptr, "There access to tokens");
+    MY_ASSERT (tokens == nullptr, "There access to tokens");    
 
-    node_t * node = getTerm (tokens); // TODO: A code generation must be here. This is the solution for the problem above
-    if ((*tokens)->type == TYPE_ADD)
+    node_t * node = getTerm (tokens); // TODO: there is a lot of shit, man...
+    if ((*tokens)->type == TYPE_ADD || (*tokens)->type == TYPE_SUB)
     {
-        printf ("\033[31m erroneous entry9 \033[0m \n");
-        (*tokens)++;
-        node_t * node_1 = getTerm (tokens);
-        node_t * headNode = createNodeWithOperation (OP_ADD, node, node_1);
-        return headNode;
-    }
-    else if ((*tokens)->type == TYPE_SUB)
-    {
-        printf ("\033[31m erroneous entry10 \033[0m \n");
-        (*tokens)++;
-        node_t * node_1 = getTerm (tokens);
-        node_t * headNode = createNodeWithOperation (OP_SUB, node, node_1);
-        return headNode;
+
+        node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
+        multipleInstructions[0] = node;
+        size_t i = 0;
+        for (; (*tokens)->type == TYPE_ADD || (*tokens)->type == TYPE_SUB; i++)
+        {
+            int operation = (*tokens)->type;
+            (*tokens)++;
+            if (i == STANDART_NUM_OF_INSTRUCTION-1)
+            {
+                multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
+            }
+            node_t * node_1 = getTerm (tokens);
+            node_t * node_2 = nullptr;
+            if (operation == TYPE_ADD)
+            {
+                node_2 = createNodeWithOperation (OP_ADD, multipleInstructions[i], node_1);
+            }
+            else
+            {
+                node_2 = createNodeWithOperation (OP_SUB, multipleInstructions[i], node_1);
+
+            }
+            multipleInstructions[i+1] = node_2;
+        }
+
+        node_t * finalNode = copyNode (multipleInstructions[i]);
+
+        deleteTree (multipleInstructions[i]);
+        free (multipleInstructions);
+
+        return finalNode;
     }
     else
     {
@@ -384,21 +469,39 @@ static node_t * getTerm (token_t ** tokens)
 
     node_t * node = getPrimary (tokens);
 
-    if ((*tokens)->type == TYPE_MUL)
-    {
-        printf ("\033[31m erroneous entry11 \033[0m \n");
-        (*tokens)++;
-        node_t * node_1 = getPrimary (tokens);
-        node_t * headNode = createNodeWithOperation (OP_MUL, node, node_1);
-        return headNode;
-    }
-    else if ((*tokens)->type == TYPE_DIV)
-    {
-        printf ("\033[31m erroneous entry12 \033[0m \n");
-        (*tokens)++;
-        node_t * node_1 = getPrimary (tokens);
-        node_t * headNode = createNodeWithOperation (OP_DIV, node, node_1);
-        return headNode;
+    if (((*tokens)->type == TYPE_MUL) || ((*tokens)->type == TYPE_DIV))
+    {        
+        node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
+        multipleInstructions[0] = node;
+        size_t i = 0;
+        for (; ((*tokens)->type == TYPE_MUL) || ((*tokens)->type == TYPE_DIV); i++)
+        {
+            int operation = (*tokens)->type;
+            (*tokens)++;
+            if (i == STANDART_NUM_OF_INSTRUCTION-1)
+            {
+                multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
+            }
+            node_t * node_1 = getPrimary (tokens);
+            node_t * node_2 = nullptr;
+            if (operation == TYPE_MUL)
+            {
+                node_2 = createNodeWithOperation (OP_MUL, multipleInstructions[i], node_1);
+            }
+            else
+            {
+                node_2 = createNodeWithOperation (OP_DIV, multipleInstructions[i], node_1);
+
+            }
+            multipleInstructions[i+1] = node_2;
+        }
+
+        node_t * finalNode = copyNode (multipleInstructions[i]);
+
+        deleteTree (multipleInstructions[i]);
+        free (multipleInstructions);
+
+        return finalNode;
     }
     else
     {
@@ -412,7 +515,6 @@ static node_t * getPrimary (token_t ** tokens)
 
     if ((*tokens)->type == TYPE_SUB)
     {
-        printf ("\033[31m erroneous entry13 \033[0m \n");
         (*tokens)++;
         node_t * node_1 = createNodeWithNum (-1);
         node_t * node_2 = getExpression (tokens);
@@ -422,40 +524,54 @@ static node_t * getPrimary (token_t ** tokens)
     }
     else if ((*tokens)->type == TYPE_O_BRACKET)
     {
-        printf ("\033[31m erroneous entry14 \033[0m \n");
         (*tokens)++;
         node_t * node = getExpression (tokens);
-        (*tokens)++;
         MY_ASSERT ((*tokens)->type != TYPE_C_BRACKET, "You forgot to close the bracket");
         (*tokens)++;
         return node;
     }
     else if ((*tokens)->type == TYPE_NUM)
     {
-        printf ("\033[31m erroneous entry15 \033[0m \n");
         node_t * node = createNodeWithNum ((*tokens)->u1.value);
         (*tokens)++;
         return node;
     }
-    else if ((*tokens)->type == TYPE_ID)
+    else if (((*tokens)->type == TYPE_ID) && ((*tokens + 1)->type == TYPE_O_BRACKET))
     {
-        printf ("in getPrimary TYPE_ID\n");
-        node_t * node = createNodeWithVariable ((*tokens)->u1.id);
+        node_t * funcName = getId (tokens);
+        MY_ASSERT ((*tokens)->type != TYPE_O_BRACKET, "The condition in if must always be surrounded by parentheses");
+        (*tokens)++;
+        node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
+        node_t * expr_1 = getExpression (tokens);
+
+        multipleInstructions[0] = createKeyNode (PARAM_T, nullptr, expr_1);
+
+        size_t i = 0;
+        for (; (*tokens)->type != TYPE_C_BRACKET; i++)
+        {
+            if (i == STANDART_NUM_OF_INSTRUCTION-1)
+            {
+                multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
+            }
+            node_t * expr_2 = getExpression (tokens);
+            node_t * node = createKeyNode (PARAM_T, nullptr, expr_2);
+            multipleInstructions[i]->parent = node;
+            node->left = multipleInstructions[i];
+            multipleInstructions[i+1] = node;
+        }
         (*tokens)++;
 
-        // printf ("in getPrimary TYPE_ID\n");
-        // node_t * node = nullptr;
-        // if (((*tokens)+1)->type != TYPE_O_BRACKET)
-        // {
-        //     node = createNodeWithVariable ((*tokens)->u1.id);
-        //     (*tokens)++;
-        // }
+        node_t * headNode = createKeyNode (CALL_T, funcName, multipleInstructions[i]);
 
-        return node;
+        free (multipleInstructions);
+        return headNode;
+    }
+    else if ((*tokens)->type == TYPE_ID)
+    {
+        return getId(tokens);
     }
     else
     {
-        printf ("\033[31m erroneous entry17 \033[0m \n");
         MY_ASSERT (1, "Wrong command");
         return nullptr;
     }
@@ -466,6 +582,16 @@ static node_t * getId (token_t ** tokens)
     MY_ASSERT (tokens == nullptr, "There access to tokens");
 
     node_t * node = createNodeWithVariable ((*tokens)->u1.id);
+    (*tokens)++;
+
+    return node;
+}
+
+static node_t * getFunc (token_t ** tokens)
+{
+    MY_ASSERT (tokens == nullptr, "There access to tokens");
+
+    node_t * node = createNodeWithFunction ((*tokens)->u1.id);
     (*tokens)++;
 
     return node;
@@ -491,8 +617,6 @@ static void checkSemicolon (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
 
-    printf ("(*tokens)->type = %d, (*tokens - 1)->type = %d\n", (*tokens)->type, (*tokens - 1)->type);
-
     if ((*tokens)->type != TYPE_SEMICOLON)
     {
         MY_ASSERT (1, "The expression must end with a semicolon");
@@ -504,7 +628,8 @@ static node_t * createParams (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
 
-    node_t * identifier = getPrimary (tokens);
-    node_t * node = createNodeInstruction (PARAM_T, nullptr, identifier);
+    node_t * identifier = getId (tokens);
+    node_t * node = createKeyNode (PARAM_T, nullptr, identifier);
+    
     return node;
 }
