@@ -4,6 +4,6 @@
 #include "tree.h"
 #include "MY_ASSERT.h"
 
-void textTree (node_t * node);
+void textTree (node_t * node, char * name);
 
 #endif

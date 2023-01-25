@@ -17,7 +17,7 @@ node_t * createNodeWithNum (elem_t num)
 	return node;
 }
 
-node_t * createNodeWithOperation (enum operation oper, node_t * nodeL, node_t * nodeR)
+node_t * createNodeWithOperation (enum operation oper, node_t * nodeL, node_t * nodeR, const char * operName)
 {
 	MY_ASSERT (nodeL == nullptr, "There is no access to the left node");
 	MY_ASSERT (nodeR == nullptr, "There is no access to the right node");
@@ -35,7 +35,7 @@ node_t * createNodeWithOperation (enum operation oper, node_t * nodeL, node_t * 
 		oper != OP_LOG_OR 		&&
 		oper != OP_LESS_OR_EQ 	&&
 		oper != OP_GR_OR_EQ		&&
-		oper != OP_CELEBRATION	&&
+		oper != OP_IDENTITY	&&
 		oper != OP_NOT_EQUAL	&&
 		oper != OP_DENIAL)
 	{
@@ -47,11 +47,13 @@ node_t * createNodeWithOperation (enum operation oper, node_t * nodeL, node_t * 
 	nodeL->parent = node;
 	nodeR->parent = node;
 	node->op_t = oper;
+
+	node->supportName = operName;
 	
 	return node;
 }
 
-node_t * createKeyNode (enum keyword type, node_t * nodeL, node_t * nodeR)
+node_t * createKeyNode (enum keyword type, node_t * nodeL, node_t * nodeR, const char * supportName)
 {
 	node_t * node = (node_t *) calloc (1, sizeof(node_t));
 	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
@@ -69,6 +71,8 @@ node_t * createKeyNode (enum keyword type, node_t * nodeL, node_t * nodeR)
 		node->left = nodeL;
 		nodeL->parent = node;
 	}
+
+	node->supportName = supportName;
 
 	return node;
 }
@@ -94,13 +98,27 @@ node_t * createNodeWithFunction (char * funcName)
 	node->id_t = ID_FUNC;
 	node->name = funcName;
 
+	#define BASE_FUNC(name, type)		\
+		if ((strcmp (funcName, name) == 0))	\
+		{									\
+			node->b_func_t = type;		\
+		}									\
+		else
+
 	if ((strcmp (funcName, "main") == 0))
 	{
 		MY_ASSERT (IS_MAIN == true, "There should be only one main function");
 		node->key_t = MAIN_T;
 		IS_MAIN = true;
 	}
+	else
 
+
+	#include "baseFunc.h"
+
+	{}
+
+	#undef BASE_FUNC
 	return node;
 }
 

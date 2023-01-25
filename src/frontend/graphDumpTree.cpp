@@ -73,7 +73,7 @@ void writeNodeToDotFile (const node_t * node, FILE * graphicDump)
 		{
 			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, "||");
 		}
-		else if (node->op_t == OP_CELEBRATION)
+		else if (node->op_t == OP_IDENTITY)
 		{
 			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, "==");
 		}
@@ -136,7 +136,7 @@ void writeNodeToDotFile (const node_t * node, FILE * graphicDump)
 	}
 	else
 	{
-		dumplineTree ("\t node%p [label=\"%s\"];\n", node, node->name);
+		dumplineTree ("\t node%p [label=\"%s\", shape=polygon, style=filled, fillcolor=bisque];\n", node, node->name);
 	}
 
 	if (node->left != nullptr)

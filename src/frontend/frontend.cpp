@@ -9,7 +9,7 @@
 
 int main (int argc, char * argv[])
 {
-    MY_ASSERT (argc != 2, "Too few argument in a command line");
+    MY_ASSERT (argc != 3, "Too few argument in a command line");
 
     char * code = getCode (argv[1]);
 
@@ -21,7 +21,7 @@ int main (int argc, char * argv[])
 
     graphicDumpTree (node);
 
-    textTree (node);
+    textTree (node, argv[2]);
 
     free (code);
 
@@ -29,7 +29,9 @@ int main (int argc, char * argv[])
 
     for (size_t i = 0; i < tokenResult.nTokens; i++)
     {
-        if (tokenResult.tokens[i].type == TYPE_ID)
+        if (tokenResult.tokens[i].type == TYPE_ID || tokenResult.tokens[i].type == TYPE_COS ||
+            tokenResult.tokens[i].type == TYPE_SIN || tokenResult.tokens[i].type == TYPE_LN ||
+            tokenResult.tokens[i].type == TYPE_PRINT || tokenResult.tokens[i].type == TYPE_SCAN)
         {
             free (tokenResult.tokens[i].u1.id);
         }

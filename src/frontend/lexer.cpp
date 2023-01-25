@@ -116,6 +116,13 @@ static void setToken (char *word, token_t *tokens, size_t ip)
         if (strcmp (word, terminal) == 0)       \
         {                                       \
             tokens[ip].type = nameCmd;          \
+            if (nameCmd == TYPE_SIN || nameCmd == TYPE_COS ||   \
+                nameCmd == TYPE_LN ||  nameCmd == TYPE_PRINT || \
+                nameCmd == TYPE_SCAN)   \
+            {   \
+                tokens[ip].u1.id = word;\
+                printf ("AAAAAAAAAA %s, ip = %zu\n", tokens[ip].u1.id, ip);\
+            }\
         }                                       \
         else
 
@@ -166,11 +173,14 @@ retLex_t getTokens (char * code)
             free(word);
             break;
         }
+        printf ("word = %s\n", word);
         setToken(word, tokens, i);
         code = code + strlen(word);
         numTokens++;
 
-        if (tokens[i].type != TYPE_ID)
+        if (tokens[i].type != TYPE_ID && tokens[i].type != TYPE_SIN &&
+            tokens[i].type != TYPE_COS && tokens[i].type != TYPE_LN &&
+            tokens[i].type != TYPE_PRINT && tokens[i].type != TYPE_SCAN)
         {
             free(word);
         }
@@ -195,10 +205,17 @@ retLex_t getTokens (char * code)
         {
             fprintf (logfile, "----> id   = %s\n", tokens[i].u1.id);
         }
+        else if (tokens[i].type == TYPE_SIN || tokens[i].type == TYPE_COS ||
+                tokens[i].type == TYPE_LN ||  tokens[i].type == TYPE_PRINT ||
+                tokens[i].type == TYPE_SCAN) 
+        {
+            fprintf (logfile, "----> id   = %s\n", tokens[i].u1.id);
+        }       
         else if (tokens[i].type == TYPE_NUM)
         {
             fprintf (logfile, "----> val  = %d\n", tokens[i].u1.value);
         }
+        
     }
 
     return result;
