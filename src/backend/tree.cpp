@@ -35,7 +35,7 @@ node_t * createNodeWithOperation (enum operation oper, node_t * nodeL, node_t * 
 		oper != OP_LOG_OR 		&&
 		oper != OP_LESS_OR_EQ 	&&
 		oper != OP_GR_OR_EQ		&&
-		oper != OP_CELEBRATION	&&
+		oper != OP_IDENTITY		&&
 		oper != OP_NOT_EQUAL	&&
 		oper != OP_DENIAL)
 	{
@@ -98,13 +98,28 @@ node_t * createNodeWithFunction (char * funcName)
 	node->id_t = ID_FUNC;
 	node->name = funcName;
 
+	#define BASE_FUNC(name, type)		\
+		if ((strcmp (funcName, name) == 0))	\
+		{									\
+			node->b_func_t = type;		\
+		}									\
+		else
+
 	if ((strcmp (funcName, "main") == 0))
 	{
 		MY_ASSERT (IS_MAIN == true, "There should be only one main function");
 		node->key_t = MAIN_T;
 		IS_MAIN = true;
 	}
+	else
 
+
+	#include "baseFunc.h"
+
+
+	{}
+
+	#undef BASE_FUNC
 	return node;
 }
 
@@ -145,8 +160,12 @@ void deleteTree (node_t * node)
         deleteTree (node->right);
     }
 
-	if (node->id_t == 1 || node->id_t == 2) //TODO: исправить на node->id_t != 0
+	if (node->id_t == ID_FUNC || node->id_t == ID_VAR) //TODO: исправить на node->id_t != 0
 	{
+		if (node->id_t == ID_FUNC)
+		{
+			printf ("LOL\n");
+		}
 		free (node->name);
 	}
     free(node);

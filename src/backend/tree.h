@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum standartFunc {
+enum baseFunc {
     NO_SF           = 0,
     SIN_T           = 1,
     COS_T           = 2,
@@ -36,7 +36,7 @@ enum operation {
     OP_LOG_AND      = 3,
     OP_LOG_OR       = 4,
     OP_NOT_EQUAL    = 5,
-    OP_CELEBRATION  = 6,
+    OP_IDENTITY  = 6,
     OP_ADD          = '+',
     OP_SUB          = '-',
     OP_MUL          = '*',
@@ -49,9 +49,9 @@ enum operation {
 };
 
 enum identifier {
-    NO_ID = 0,
+    NO_ID   = 0,
     ID_FUNC = 1,
-    ID_VAR = 2
+    ID_VAR  = 2
 };
 
 typedef double elem_t;
@@ -62,7 +62,7 @@ struct nodeTree {
     struct nodeTree * right;
 
     enum operation op_t;
-    enum standartFunc s_func_t;
+    enum baseFunc b_func_t;
     enum keyword key_t;
     enum identifier id_t;
 
