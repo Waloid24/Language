@@ -129,7 +129,6 @@ static node_t * getDefine (token_t ** tokens)
 
     node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
     multipleInstructions[0] = getStatement (tokens);
-
     size_t j = 0;
     for (; (*tokens)->type != TYPE_C_F_BRACKET; j++)
     {
@@ -159,7 +158,6 @@ static node_t * getStatement (token_t ** tokens)
     MY_ASSERT (tokens == nullptr, "No access to tokens");
 
     node_t * node = nullptr;
-
     if ((*tokens)->type == TYPE_IF)
     {
         node = getConditional (tokens);
@@ -227,7 +225,6 @@ static node_t * getCycle (token_t ** tokens)
         MY_ASSERT (1, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
     }
     (*tokens)++;
-
     node_t * condition = getExpression (tokens);
 
     if ((*tokens)->type != TYPE_C_BRACKET)
@@ -426,7 +423,6 @@ static node_t * getArithmetic (token_t ** tokens)
     node_t * node = getTerm (tokens); // TODO: there is a lot of shit, man...
     if ((*tokens)->type == TYPE_ADD || (*tokens)->type == TYPE_SUB)
     {
-
         node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
         multipleInstructions[0] = node;
         size_t i = 0;
@@ -514,7 +510,7 @@ static node_t * getTerm (token_t ** tokens)
 static node_t * getPrimary (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "There access to tokens");
-
+    printf ("(*tokens)->type = %d\n", (*tokens)->type);
     if ((*tokens)->type == TYPE_SUB)
     {
         (*tokens)++;
@@ -543,9 +539,7 @@ static node_t * getPrimary (token_t ** tokens)
             ((*tokens)->type == TYPE_PRINT) || ((*tokens)->type == TYPE_SCAN))
             && ((*tokens + 1)->type == TYPE_O_BRACKET))
     {
-        printf ("(*tokens)->type = %d\n", (*tokens)->type);
         node_t * funcName = getFunc (tokens); //было node_t * funcName = getId (tokens);
-        printf ("end getFunc\n");
         MY_ASSERT ((*tokens)->type != TYPE_O_BRACKET, "The condition in if must always be surrounded by parentheses");
         (*tokens)++;
         node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
@@ -567,9 +561,8 @@ static node_t * getPrimary (token_t ** tokens)
             multipleInstructions[i+1] = node;
         }
         (*tokens)++;
-
-        node_t * headNode = createKeyNode (CALL_T, funcName, multipleInstructions[i], "CALL");
-
+        
+        node_t * headNode = createKeyNode (CALL_T, funcName, multipleInstructions[i], "CALL");   
         if ((*tokens)->type == TYPE_SEMICOLON)
         {
             (*tokens)++;
@@ -584,7 +577,6 @@ static node_t * getPrimary (token_t ** tokens)
     }
     else
     {
-        printf ("in getPrimary: (*tokens)->type = %d\n", (*tokens)->type);
         MY_ASSERT (1, "Wrong command");
         return nullptr;
     }
@@ -604,11 +596,8 @@ static node_t * getFunc (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "There access to tokens");
 
-    printf ("(*tokens)->u1.id = %s\n", (*tokens)->u1.id);
-    printf ("after this\n");
     node_t * node = createNodeWithFunction ((*tokens)->u1.id);
     (*tokens)++;
-    printf ("before exit from getFunc\n");
     return node;
 }
 
