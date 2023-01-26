@@ -36,7 +36,7 @@ enum operation {
     OP_LOG_AND      = 3,
     OP_LOG_OR       = 4,
     OP_NOT_EQUAL    = 5,
-    OP_IDENTITY  = 6,
+    OP_IDENTITY     = 6,
     OP_ADD          = '+',
     OP_SUB          = '-',
     OP_MUL          = '*',
