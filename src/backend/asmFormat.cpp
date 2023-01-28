@@ -55,7 +55,6 @@ static void filledFile (node_t * node, FILE * asmFile, var_t ** tableGlobVars)
         }
         processDefineParams (node->left->right, asmFile, tableGlobVars, &tableLocalVars, &numVars);
         processFuncBody (node->right, asmFile, tableGlobVars, &tableLocalVars, &numVars);
-        printf ("end func: node->left->left->name = %s\n", node->left->left->name);
 
         if (node->left->left->key_t != MAIN_T)
         {
@@ -81,7 +80,7 @@ static void filledFile (node_t * node, FILE * asmFile, var_t ** tableGlobVars)
         {
             if ((*tableGlobVars)[i].name != nullptr && strcmp (node->left->name, (*tableGlobVars)[i].name) == 0)
             {
-                printAsm ("pop [rax + %zu];\n", (*tableGlobVars)[i].num); //берем из rax число, прибавляем к нему нужное и кладем в ячейку с этим индексом число из стэка
+                printAsm ("pop [rax + %zu];\n", (*tableGlobVars)[i].num);
                 isVarInTable = true;
                 break;
             }
@@ -123,9 +122,8 @@ static void processDefineParams (node_t * node, FILE * asmFile, var_t ** tableGl
 {
     MY_ASSERT (asmFile == nullptr, "No access to the file");
 
-    if (node == nullptr) //The case when the function has no parameters
+    if (node == nullptr)
     {
-        printf ("No parameters in functions\n");
         return ;
     }
 
@@ -187,7 +185,7 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
     {
         return ;
     }
-
+    
     if (node->op_t == OP_ASSIGN)
     {
         processAssign (node, asmFile, tableGlobVars, tableLocalVars, numVars);
@@ -227,7 +225,6 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
         size_t tmp = NUM_WHILE;
         NUM_WHILE++;
         processExpr (node->left, asmFile, tableGlobVars, tableLocalVars, numVars);
-        printf ("node->left->op_t = %d\n", node->left->op_t);
         printAsm ("push 0;\n");
         printAsm ("je endWhile%zu:;\n", tmp);
         processFuncBody (node->right, asmFile, tableGlobVars, tableLocalVars, numVars);
@@ -267,13 +264,19 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
         {
             MY_ASSERT (node->right == nullptr, "\"cos\" function must have a parameter");
             processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
-            printAsm ("sin;\n");
+            printAsm ("cos;\n");
         }
         else if (node->left->b_func_t == LN_T)
         {
             MY_ASSERT (node->right == nullptr, "\"ln\" function must have a parameter");
             processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
             printAsm ("ln;\n");
+        }
+        else if (node->left->b_func_t == SQRT_T)
+        {
+            MY_ASSERT (node->right == nullptr, "\"ln\" function must have a parameter");
+            processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
+            printAsm ("sqrt;\n");
         }
         else
         {
@@ -299,6 +302,51 @@ static void processExpr (node_t * node, FILE * asmFile, var_t ** tableGlobVars, 
 {
     MY_ASSERT (asmFile == nullptr, "No access to the file");
     MY_ASSERT (tableGlobVars == nullptr, "No access to the variable table");
+
+    // if (node->left != nullptr)
+    // {
+    //     processExpr (node->left, asmFile, tableGlobVars, tableLocalVars, numVars);
+    // }
+
+    // if (node->right != nullptr)
+    // {
+    //     processExpr (node->right, asmFile, tableGlobVars, tableLocalVars, numVars);
+    // }
+
+    if (node->key_t == CALL_T) //это добавлено
+    {
+        // if (node->left->b_func_t == SIN_T)
+        // {
+        //     MY_ASSERT (node->right == nullptr, "\"sin\" function must have a parameter");
+        //     processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
+        //     printAsm ("sin;\n");
+        // }
+        // else if (node->left->b_func_t == COS_T)
+        // {
+        //     MY_ASSERT (node->right == nullptr, "\"cos\" function must have a parameter");
+        //     processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
+        //     printAsm ("cos;\n");
+        // }
+        // else if (node->left->b_func_t == LN_T)
+        // {
+        //     MY_ASSERT (node->right == nullptr, "\"ln\" function must have a parameter");
+        //     processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
+        //     printAsm ("ln;\n");
+        // }
+        // else 
+        if (node->left->b_func_t == SQRT_T)
+        {
+            MY_ASSERT (node->right == nullptr, "\"ln\" function must have a parameter");
+            processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
+            printAsm ("sqrt;\n");
+        }
+        // else
+        // {
+        //     processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
+        //     printAsm ("jmp %s:;\n", node->left->name);
+        // }
+        return ;
+    }
 
     if (node->left != nullptr)
     {
@@ -422,13 +470,12 @@ static void processCallParams (node_t * node, FILE * asmFile, var_t ** tableGlob
         }
         if (isVarInTable == false)
         {
-            printf ("var: node->name = %s\n", node->name);
             MY_ASSERT (1, "This variable is not in the table");
         }
     }
     if (node->isNum == true)
     {
-        printAsm ("push %.0lf\n", node->elem);
+        printAsm ("push %.0lf;\n", node->elem);
     }
 }
 

@@ -162,10 +162,6 @@ void deleteTree (node_t * node)
 
 	if (node->id_t == ID_FUNC || node->id_t == ID_VAR) //TODO: исправить на node->id_t != 0
 	{
-		if (node->id_t == ID_FUNC)
-		{
-			printf ("LOL\n");
-		}
 		free (node->name);
 	}
     free(node);

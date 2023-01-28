@@ -183,8 +183,6 @@ static void createHtmlFileTree(const char * nameFileDump, unsigned int * timesCr
 	char namePicture[100] = {};
     sprintf (namePicture, "graph%u.png", *timesCreatePicture);
 
-	printf ("namePicture = %s\n", namePicture);
-
 	fprintf (treeHTML, "<img src=\"%s\" alt=\"dump РІвЂћвЂ“%u\">\n", namePicture, *timesCreatePicture);
 	fprintf (treeHTML, "<hr>\n\n");
 

@@ -42,7 +42,8 @@ node_t * createTree (char ** code)
         isQuotMarks = true;
         free (tmpWord);
     }
-    else if (word[0] >= 48 && word[0] <= 57 && isalpha(word[1]) == 0)
+    else if ((word[0] >= 48 && word[0] <= 57 && isalpha(word[1]) == 0) ||
+            (word[0] == '-' && word[1] >= 48 && word[1] <= 57))
     {
         node = createNodeWithNum (atoi(word));
     }
@@ -50,7 +51,6 @@ node_t * createTree (char ** code)
 
     #include "types.h"
     #include "operations.h"
-    // #include "baseFunc.h" .//below is what this takes into account
 
     {
         MY_ASSERT (1, "Something error");
@@ -130,6 +130,7 @@ node_t * createTree (char ** code)
         char * name = node->left->name;
         deleteNode (node->left);
         node->left = createNodeWithFunction (name);
+        graphicDumpTree (node->left);
     }
 
     return node;
