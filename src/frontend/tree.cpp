@@ -12,7 +12,7 @@ node_t * createNodeWithNum (elem_t num)
 	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
 
 	node->isNum = true;
-	node->elem = num;
+	node->elem = (int) num;
 
 	return node;
 }
@@ -35,7 +35,7 @@ node_t * createNodeWithOperation (enum operation oper, node_t * nodeL, node_t * 
 		oper != OP_LOG_OR 		&&
 		oper != OP_LESS_OR_EQ 	&&
 		oper != OP_GR_OR_EQ		&&
-		oper != OP_IDENTITY	&&
+		oper != OP_IDENTITY		&&
 		oper != OP_NOT_EQUAL	&&
 		oper != OP_DENIAL)
 	{

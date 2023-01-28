@@ -10,7 +10,8 @@ enum baseFunc {
     COS_T           = 2,
     LN_T            = 3,
     PRINT_T         = 4,
-    SCAN_T          = 5
+    SCAN_T          = 5,
+    SQRT_T          = 6
 };
 
 enum keyword {

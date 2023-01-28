@@ -1,7 +1,5 @@
 #include "lexer.h"
 
-//РњРѕР¶РЅРѕ Р»Рё РІ РѕРґРЅРѕРј .h С„Р°Р№Р»Рµ СЌС‚Рѕ РѕР±СЉСЏРІРёС‚СЊ?
-
 #define DEF_CMD(nameCmd, value, ...)\
     const int nameCmd = value;
 
@@ -88,6 +86,11 @@ static char * getWord(char * str)
 
     while (*str != ' ' && *str != '\t' && *str != '\n' && *str != '\0' && *str != ',')
     {
+        if (*str == '-')
+        {
+            lengthWord = 1;
+            break;
+        }
         lengthWord++;
         str++;
     }
@@ -118,10 +121,9 @@ static void setToken (char *word, token_t *tokens, size_t ip)
             tokens[ip].type = nameCmd;          \
             if (nameCmd == TYPE_SIN || nameCmd == TYPE_COS ||   \
                 nameCmd == TYPE_LN ||  nameCmd == TYPE_PRINT || \
-                nameCmd == TYPE_SCAN)   \
+                nameCmd == TYPE_SCAN || nameCmd == TYPE_SQRT)   \
             {   \
                 tokens[ip].u1.id = word;\
-                printf ("AAAAAAAAAA %s, ip = %zu\n", tokens[ip].u1.id, ip);\
             }\
         }                                       \
         else
@@ -173,14 +175,14 @@ retLex_t getTokens (char * code)
             free(word);
             break;
         }
-        printf ("word = %s\n", word);
         setToken(word, tokens, i);
         code = code + strlen(word);
         numTokens++;
 
-        if (tokens[i].type != TYPE_ID && tokens[i].type != TYPE_SIN &&
-            tokens[i].type != TYPE_COS && tokens[i].type != TYPE_LN &&
-            tokens[i].type != TYPE_PRINT && tokens[i].type != TYPE_SCAN)
+        if (tokens[i].type != TYPE_ID       && tokens[i].type != TYPE_SIN   &&
+            tokens[i].type != TYPE_COS      && tokens[i].type != TYPE_LN    &&
+            tokens[i].type != TYPE_PRINT    && tokens[i].type != TYPE_SCAN  &&
+            tokens[i].type != TYPE_SQRT)
         {
             free(word);
         }
@@ -190,7 +192,7 @@ retLex_t getTokens (char * code)
     if (numTokens == (tmpStandartSize - 1))
     {
         tmpStandartSize++;
-        tokens = (token_t *)realloc(tokens, tmpStandartSize * sizeof(token_t)); //ok
+        tokens = (token_t *)realloc(tokens, tmpStandartSize * sizeof(token_t));
     }
     tokens[numTokens-1].type = TYPE_END_TOKENS;
 
@@ -207,7 +209,7 @@ retLex_t getTokens (char * code)
         }
         else if (tokens[i].type == TYPE_SIN || tokens[i].type == TYPE_COS ||
                 tokens[i].type == TYPE_LN ||  tokens[i].type == TYPE_PRINT ||
-                tokens[i].type == TYPE_SCAN) 
+                tokens[i].type == TYPE_SCAN || tokens[i].type == TYPE_SQRT) 
         {
             fprintf (logfile, "----> id   = %s\n", tokens[i].u1.id);
         }       

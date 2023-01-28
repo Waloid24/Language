@@ -198,7 +198,6 @@ static node_t * getAssign (token_t ** tokens)
     node_t * headNode = createNodeWithOperation (OP_ASSIGN, node, supportNode, "AS");
 
     checkSemicolon (tokens);
-
     return headNode;
 }
 
@@ -284,7 +283,7 @@ static node_t * getConditional (token_t ** tokens)
 
     node_t * condition = getExpression (tokens);
 
-    if ((*tokens)->type != TYPE_C_BRACKET)
+    if ((*tokens)->type != TYPE_C_BRACKET) //TODO: в один MY_ASSERT
     {
         MY_ASSERT (1, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
     }
@@ -510,14 +509,13 @@ static node_t * getTerm (token_t ** tokens)
 static node_t * getPrimary (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "There access to tokens");
-    printf ("(*tokens)->type = %d\n", (*tokens)->type);
-    if ((*tokens)->type == TYPE_SUB)
+    if (((*tokens)->type == TYPE_ID) && (strcmp ((*tokens)->u1.id, "-") == 0))
     {
         (*tokens)++;
         node_t * node_1 = createNodeWithNum (-1);
-        node_t * node_2 = getExpression (tokens);
+        node_t * node_2 = getPrimary (tokens);
         node_t * headNode = createNodeWithOperation (OP_MUL, node_1, node_2, "MUL");
-        (*tokens)++;
+        graphicDumpTree (headNode);
         return headNode;
     }
     else if ((*tokens)->type == TYPE_O_BRACKET)
@@ -536,8 +534,8 @@ static node_t * getPrimary (token_t ** tokens)
     }
     else if ((((*tokens)->type == TYPE_ID) || ((*tokens)->type == TYPE_SIN) ||
             ((*tokens)->type == TYPE_COS) || ((*tokens)->type == TYPE_LN) ||
-            ((*tokens)->type == TYPE_PRINT) || ((*tokens)->type == TYPE_SCAN))
-            && ((*tokens + 1)->type == TYPE_O_BRACKET))
+            ((*tokens)->type == TYPE_PRINT) || ((*tokens)->type == TYPE_SCAN) || 
+            ((*tokens)->type == TYPE_SQRT)) && ((*tokens + 1)->type == TYPE_O_BRACKET))
     {
         node_t * funcName = getFunc (tokens); //было node_t * funcName = getId (tokens);
         MY_ASSERT ((*tokens)->type != TYPE_O_BRACKET, "The condition in if must always be surrounded by parentheses");
@@ -562,12 +560,12 @@ static node_t * getPrimary (token_t ** tokens)
         }
         (*tokens)++;
         
-        node_t * headNode = createKeyNode (CALL_T, funcName, multipleInstructions[i], "CALL");   
-        if ((*tokens)->type == TYPE_SEMICOLON)
+        node_t * headNode = createKeyNode (CALL_T, funcName, multipleInstructions[i], "CALL");
+        graphicDumpTree (headNode);
+        if ((*tokens)->type == TYPE_SEMICOLON) //23:34. было закоменченно в 23:13, чтобы работал sqrt. в 23:34 раскомент., так как было исправлена работа getAssign в backend, добавлена обработка CALL_T
         {
             (*tokens)++;
         }
-
         free (multipleInstructions);
         return headNode;
     }

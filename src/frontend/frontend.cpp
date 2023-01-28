@@ -14,7 +14,6 @@ int main (int argc, char * argv[])
     char * code = getCode (argv[1]);
 
     retLex_t tokenResult = getTokens (code);
-
     token_t * tmp = tokenResult.tokens;
 
     node_t * node = getGeneral(&tmp);
@@ -31,7 +30,8 @@ int main (int argc, char * argv[])
     {
         if (tokenResult.tokens[i].type == TYPE_ID || tokenResult.tokens[i].type == TYPE_COS ||
             tokenResult.tokens[i].type == TYPE_SIN || tokenResult.tokens[i].type == TYPE_LN ||
-            tokenResult.tokens[i].type == TYPE_PRINT || tokenResult.tokens[i].type == TYPE_SCAN)
+            tokenResult.tokens[i].type == TYPE_PRINT || tokenResult.tokens[i].type == TYPE_SCAN ||
+            tokenResult.tokens[i].type == TYPE_SQRT)
         {
             free (tokenResult.tokens[i].u1.id);
         }

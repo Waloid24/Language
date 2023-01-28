@@ -37,7 +37,6 @@ static void dumpTree (node_t * node, FILE * textDump)
     
     if (node->name == nullptr && node->isNum == false)
     {
-        printf ("node->key_t = %d, node->supportName = %s\n", node->key_t, node->supportName);
         print ("%s",node->supportName);
     }
     else if (node->name != nullptr && node->isNum == false)
@@ -56,7 +55,6 @@ static void dumpTree (node_t * node, FILE * textDump)
     print ("(");
     if (node->left != nullptr)
     {
-        printf ("left\n");
         dumpTree (node->left, textDump);
     }
     print (")");
@@ -64,7 +62,6 @@ static void dumpTree (node_t * node, FILE * textDump)
     print ("(");
     if (node->right != nullptr)
     {
-        printf ("right, node->isNum = %d, node->right->isNum = %d\n", node->isNum, node->right->isNum);
         dumpTree (node->right, textDump);
     }
     print (")");
