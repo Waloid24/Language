@@ -8,7 +8,7 @@ This language is similar to the C language. Features of my language:
 * ssupports functions and their calls
 * supports global variables
 * supports `if`, `else`
-* supports `while`
+* supports `while`    
 Program starts with the `main` function, which cannot be called. Functions can be used even in situations where they are defined after the called place. 
 
 
