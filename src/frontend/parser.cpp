@@ -23,7 +23,6 @@ static node_t * getPrimary (token_t ** tokens);
 
 static void checkSemicolon (token_t ** tokens);
 static node_t ** increaseMemory (node_t ** ptr, size_t * size);
-static void   * allocateMemory (size_t numElem, size_t sizeElem);
 static node_t * createParams (token_t ** tokens);
 static node_t * getId (token_t ** tokens);
 static node_t * getFunc (token_t ** tokens);
@@ -90,10 +89,7 @@ static node_t * getDefine (token_t ** tokens)
 
     node_t * funcName = getFunc (tokens);
 
-    if ((*tokens)->type != TYPE_O_BRACKET)
-    {
-        MY_ASSERT (1, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
-    }
+    MY_ASSERT ((*tokens)->type != TYPE_O_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
     (*tokens)++;
 
     node_t ** multipleParams = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
@@ -190,7 +186,7 @@ static node_t * getAssign (token_t ** tokens)
 
     node_t * node = getPrimary (tokens);
 
-    (*tokens)++; //to skip a "="
+    (*tokens)++;
     MY_ASSERT (node->id_t != ID_VAR, "It is necessary to have a variable before the assignment sign");
     
     node_t * node_1 = getExpression (tokens);
@@ -216,26 +212,17 @@ static node_t * getTerminational (token_t ** tokens)
 static node_t * getCycle (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
-
     (*tokens)++;
 
-    if ((*tokens)->type != TYPE_O_BRACKET)
-    {
-        MY_ASSERT (1, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
-    }
+    MY_ASSERT ((*tokens)->type != TYPE_O_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
     (*tokens)++;
+
     node_t * condition = getExpression (tokens);
 
-    if ((*tokens)->type != TYPE_C_BRACKET)
-    {
-        MY_ASSERT (1, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
-    }
+    MY_ASSERT ((*tokens)->type != TYPE_C_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
     (*tokens)++;
 
-    if ((*tokens)->type != TYPE_O_F_BRACKET)
-    {
-        MY_ASSERT (1, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
-    }
+    MY_ASSERT ((*tokens)->type != TYPE_O_F_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
     (*tokens)++;
 
     node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
@@ -255,8 +242,7 @@ static node_t * getCycle (token_t ** tokens)
     }
     (*tokens)++;
 
-    node_t * headNode = (node_t *) calloc (1, sizeof(node_t));
-	MY_ASSERT (headNode == nullptr, "Unable to allocate new memory");
+    node_t * headNode = (node_t *) allocateMemory (1, sizeof(node_t));
 
 	headNode->key_t = WHILE_T;
     headNode->supportName = "WHILE";
@@ -273,20 +259,14 @@ static node_t * getCycle (token_t ** tokens)
 static node_t * getConditional (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
-
     (*tokens)++;
-    if ((*tokens)->type != TYPE_O_BRACKET)
-    {
-        MY_ASSERT (1, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
-    }
+
+    MY_ASSERT ((*tokens)->type != TYPE_O_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
     (*tokens)++;
 
     node_t * condition = getExpression (tokens);
 
-    if ((*tokens)->type != TYPE_C_BRACKET) //TODO: в один MY_ASSERT
-    {
-        MY_ASSERT (1, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
-    }
+    MY_ASSERT ((*tokens)->type != TYPE_C_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
     (*tokens)++;
 
     MY_ASSERT ((*tokens)->type != TYPE_O_F_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
@@ -314,10 +294,7 @@ static node_t * getConditional (token_t ** tokens)
     if ((*tokens)->type == TYPE_ELSE)
     {
         (*tokens)++;
-        if ((*tokens)->type != TYPE_O_F_BRACKET)
-        {
-            MY_ASSERT (1, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
-        }
+        MY_ASSERT ((*tokens)->type != TYPE_O_F_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
         (*tokens)++;        
 
         multipleInstructionsElse[0] = getStatement (tokens);
@@ -363,7 +340,7 @@ static node_t * getExpression (token_t ** tokens)
 
     if ((*tokens)->type == TYPE_LOG_AND)
     {
-        (*tokens)++; //to skip a logical symbols
+        (*tokens)++;
         node_t * node_2 = getBoolean (tokens);
         node_t * headNode = createNodeWithOperation (OP_LOG_AND, node_1, node_2, "AND");
 
@@ -371,7 +348,7 @@ static node_t * getExpression (token_t ** tokens)
     }
     else if ((*tokens)->type == TYPE_LOG_OR)
     {
-        (*tokens)++; //to skip a logical symbols
+        (*tokens)++;
         node_t * node_2 = getBoolean (tokens);
         node_t * headNode = createNodeWithOperation (OP_LOG_OR, node_1, node_2, "OR");
         
@@ -394,7 +371,7 @@ static node_t * getBoolean (token_t ** tokens)
         (*tokens)->type == TYPE_IDENTITY || (*tokens)->type == TYPE_NOT_EQUAL)
     {
         int nodeType = (*tokens)->type;
-        (*tokens)++; //to skip a comparison symbols
+        (*tokens)++;
 
         node_t * node_2 = getArithmetic (tokens);
         node_t * headNode = nullptr;
@@ -433,8 +410,10 @@ static node_t * getArithmetic (token_t ** tokens)
             {
                 multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
             }
+
             node_t * node_1 = getTerm (tokens);
             node_t * node_2 = nullptr;
+
             if (operation == TYPE_ADD)
             {
                 node_2 = createNodeWithOperation (OP_ADD, multipleInstructions[i], node_1, "ADD");
@@ -479,8 +458,10 @@ static node_t * getTerm (token_t ** tokens)
             {
                 multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
             }
+
             node_t * node_1 = getPrimary (tokens);
             node_t * node_2 = nullptr;
+            
             if (operation == TYPE_MUL)
             {
                 node_2 = createNodeWithOperation (OP_MUL, multipleInstructions[i], node_1, "MUL");
@@ -515,7 +496,6 @@ static node_t * getPrimary (token_t ** tokens)
         node_t * node_1 = createNodeWithNum (-1);
         node_t * node_2 = getPrimary (tokens);
         node_t * headNode = createNodeWithOperation (OP_MUL, node_1, node_2, "MUL");
-        graphicDumpTree (headNode);
         return headNode;
     }
     else if ((*tokens)->type == TYPE_O_BRACKET)
@@ -537,7 +517,7 @@ static node_t * getPrimary (token_t ** tokens)
             ((*tokens)->type == TYPE_PRINT) || ((*tokens)->type == TYPE_SCAN) || 
             ((*tokens)->type == TYPE_SQRT)) && ((*tokens + 1)->type == TYPE_O_BRACKET))
     {
-        node_t * funcName = getFunc (tokens); //было node_t * funcName = getId (tokens);
+        node_t * funcName = getFunc (tokens);
         MY_ASSERT ((*tokens)->type != TYPE_O_BRACKET, "The condition in if must always be surrounded by parentheses");
         (*tokens)++;
         node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
@@ -562,7 +542,7 @@ static node_t * getPrimary (token_t ** tokens)
         
         node_t * headNode = createKeyNode (CALL_T, funcName, multipleInstructions[i], "CALL");
         graphicDumpTree (headNode);
-        if ((*tokens)->type == TYPE_SEMICOLON) //23:34. было закоменченно в 23:13, чтобы работал sqrt. в 23:34 раскомент., так как было исправлена работа getAssign в backend, добавлена обработка CALL_T
+        if ((*tokens)->type == TYPE_SEMICOLON)
         {
             (*tokens)++;
         }
@@ -608,13 +588,6 @@ static node_t ** increaseMemory (node_t ** ptr, size_t * size)
     return ptr;
 }
 
-static void * allocateMemory (size_t numElem, size_t sizeElem)
-{
-    void * ptr = calloc (numElem, sizeElem);
-    MY_ASSERT (ptr == nullptr, "Unable to allocate new memory");
-    return ptr;
-}
-
 static void checkSemicolon (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
@@ -623,7 +596,7 @@ static void checkSemicolon (token_t ** tokens)
     {
         MY_ASSERT (1, "The expression must end with a semicolon");
     }
-    (*tokens)++; //to skip a ";"
+    (*tokens)++;
 }
 
 static node_t * createParams (token_t ** tokens)

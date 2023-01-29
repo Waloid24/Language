@@ -8,58 +8,67 @@
 #undef DEF_CMD
 
 static void setToken(char *word, token_t *tokens, size_t ip);
+static char * getWord(char * str);
+static char * skipSpace(char *str);
+static void dumpLexer (token_t * tokens, size_t numTokens, FILE * logfile);
 
-//--------------------------------------send source code to array---------------------------------------------
-
-static FILE * openFile(const char *nameFile)
+retLex_t getTokens (char * code, char * nameLogFile)
 {
-    MY_ASSERT(nameFile == nullptr, "Wrong pointer to name file with source code");
+    MY_ASSERT (code == nullptr, "Wrong pointer to the array with your code");
 
-    FILE *file = fopen(nameFile, "rb");
-    MY_ASSERT(file == nullptr, "Unable to open the source file");
+    FILE * logfile = openFile (nameLogFile, "w");
 
-    return file;
+    retLex_t result = {};
+
+    token_t * tokens = (token_t *) allocateMemory (STANDART_SIZE_TOKEN_ARR, sizeof(token_t));
+    size_t tmpStandartSize = STANDART_SIZE_TOKEN_ARR;
+    size_t numTokens = 0;
+
+    char * word = nullptr;
+
+    for (size_t i = 0; *code != '\0'; i++)
+    {
+        if (i == (tmpStandartSize - 1))
+        {
+            tmpStandartSize *= 2;
+            tokens = (token_t *)realloc(tokens, tmpStandartSize * sizeof(token_t)); 
+        }
+
+        code = skipSpace(code);
+        word = getWord(code);
+        if (word == nullptr)
+        {
+            free(word);
+            break;
+        }
+        setToken(word, tokens, i);
+        code = code + strlen(word);
+        numTokens++;
+
+        if (tokens[i].type != TYPE_ID       && tokens[i].type != TYPE_SIN   &&
+            tokens[i].type != TYPE_COS      && tokens[i].type != TYPE_LN    &&
+            tokens[i].type != TYPE_PRINT    && tokens[i].type != TYPE_SCAN  &&
+            tokens[i].type != TYPE_SQRT)
+        {
+            free(word);
+        }
+    }
+
+    numTokens++;
+    if (numTokens == (tmpStandartSize - 1))
+    {
+        tmpStandartSize++;
+        tokens = (token_t *) realloc (tokens, tmpStandartSize * sizeof(token_t));
+    }
+    tokens[numTokens-1].type = TYPE_END_TOKENS;
+
+    result.tokens  = tokens;
+    result.nTokens = numTokens;
+
+    dumpLexer (tokens, numTokens, logfile);
+
+    return result;
 }
-
-static size_t sizeFile(const char *argConsole)
-{
-    struct stat code = {};
-    stat(argConsole, &code);
-
-    return (size_t)code.st_size;
-}
-
-static void * createArr(size_t size, size_t sizeElem)
-{
-    void * ptrToArr = calloc(size, sizeElem);
-    MY_ASSERT(ptrToArr == nullptr, "Unable to allocate new memory");
-
-    return ptrToArr;
-}
-
-static void copyFromFile(FILE *src, void *dst, size_t sizeFile)
-{
-    MY_ASSERT(src == nullptr, "Wrong pointer to the file");
-
-    fread(dst, sizeof(char), sizeFile, src);
-}
-
-char * getCode(const char *nameFile)
-{
-    FILE * fileCode = openFile(nameFile);
-    size_t sizeArr = sizeFile(nameFile);
-    char * code = (char *)createArr(sizeArr + 1, sizeof(char));
-    copyFromFile(fileCode, code, sizeArr);
-    code[sizeArr] = '\0';
-
-    fclose(fileCode);
-
-    return code;
-}
-
-//-------------------------------------------------------------------------------------------------------------
-
-//--------------------------------------------------lexer------------------------------------------------------
 
 static char * skipSpace(char *str)
 {
@@ -100,9 +109,7 @@ static char * getWord(char * str)
         return nullptr;
     }
 
-    char * word = (char *) calloc (lengthWord + 1, sizeof(char));
-    MY_ASSERT(word == nullptr, "Unable to allocate new memory");
-
+    char * word = (char *) allocateMemory (lengthWord + 1, sizeof(char));
     word = (char *) memmove (word, tmp, lengthWord * sizeof(char));
     word[lengthWord] = '\0';
 
@@ -115,17 +122,17 @@ static void setToken (char *word, token_t *tokens, size_t ip)
     MY_ASSERT(word[0] == '_', "Uncorrect symbol: \'_\' should not be at the beginning of the word");
     MY_ASSERT((word[0] >= 48 && word[0] <= 57) && ((word[1] < 48 || word[1] > 57)) && strlen(word) > 1, "Uncorrect ...");
 
-    #define DEF_CMD(nameCmd, value, terminal)   \
-        if (strcmp (word, terminal) == 0)       \
-        {                                       \
-            tokens[ip].type = nameCmd;          \
+    #define DEF_CMD(nameCmd, value, terminal)                   \
+        if (strcmp (word, terminal) == 0)                       \
+        {                                                       \
+            tokens[ip].type = nameCmd;                          \
             if (nameCmd == TYPE_SIN || nameCmd == TYPE_COS ||   \
                 nameCmd == TYPE_LN ||  nameCmd == TYPE_PRINT || \
                 nameCmd == TYPE_SCAN || nameCmd == TYPE_SQRT)   \
-            {   \
-                tokens[ip].u1.id = word;\
-            }\
-        }                                       \
+            {                                                   \
+                tokens[ip].u1.id = word;                        \
+            }                                                   \
+        }                                                       \
         else
 
     #include "cmd.h"
@@ -144,61 +151,8 @@ static void setToken (char *word, token_t *tokens, size_t ip)
     #undef DEF_CMD
 }
 
-retLex_t getTokens (char * code)
+static void dumpLexer (token_t * tokens, size_t numTokens, FILE * logfile)
 {
-    MY_ASSERT(code == nullptr, "Wrong pointer to the array with your code");
-
-    FILE * logfile = fopen ("logTokens.txt", "wb");
-    MY_ASSERT (logfile == nullptr, "There is no access to this file");
-    setbuf (logfile, NULL);
-
-    retLex_t result = {};
-
-    token_t * tokens = (token_t *) createArr (STANDART_SIZE_TOKEN_ARR, sizeof(token_t));
-    size_t tmpStandartSize = STANDART_SIZE_TOKEN_ARR;
-    size_t numTokens = 0;
-
-    char * word = nullptr;
-
-    for (size_t i = 0; *code != '\0'; i++)
-    {
-        if (i == (tmpStandartSize - 1))
-        {
-            tmpStandartSize *= 2;
-            tokens = (token_t *)realloc(tokens, tmpStandartSize * sizeof(token_t)); 
-        }
-
-        code = skipSpace(code);
-        word = getWord(code);
-        if (word == nullptr)
-        {
-            free(word);
-            break;
-        }
-        setToken(word, tokens, i);
-        code = code + strlen(word);
-        numTokens++;
-
-        if (tokens[i].type != TYPE_ID       && tokens[i].type != TYPE_SIN   &&
-            tokens[i].type != TYPE_COS      && tokens[i].type != TYPE_LN    &&
-            tokens[i].type != TYPE_PRINT    && tokens[i].type != TYPE_SCAN  &&
-            tokens[i].type != TYPE_SQRT)
-        {
-            free(word);
-        }
-    }
-
-    numTokens++;
-    if (numTokens == (tmpStandartSize - 1))
-    {
-        tmpStandartSize++;
-        tokens = (token_t *)realloc(tokens, tmpStandartSize * sizeof(token_t));
-    }
-    tokens[numTokens-1].type = TYPE_END_TOKENS;
-
-    result.tokens  = tokens;
-    result.nTokens = numTokens;
-
     for (size_t i = 0; i < numTokens; i++)
     {
         fprintf (logfile, "tokens[%zu]\n", i);
@@ -212,14 +166,14 @@ retLex_t getTokens (char * code)
                 tokens[i].type == TYPE_SCAN || tokens[i].type == TYPE_SQRT) 
         {
             fprintf (logfile, "----> id   = %s\n", tokens[i].u1.id);
-        }       
+        }
         else if (tokens[i].type == TYPE_NUM)
         {
             fprintf (logfile, "----> val  = %d\n", tokens[i].u1.value);
         }
         
     }
-
-    return result;
 }
+
+
 

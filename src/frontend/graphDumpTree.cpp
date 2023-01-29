@@ -3,7 +3,6 @@
 #define dumplineTree(text, ...)\
 		fprintf (graphicDump, text, ##__VA_ARGS__)
 
-//--------------------------------------------graphical tree dump-------------------------------------------------
 static void dotFileHeaderForTree (const node_t * node, const char * nameDotFileTree);
 static void writeNodeToDotFile (const node_t * node, FILE * graphicDump);
 static void writeEdgeToDotFile (const node_t * node, FILE * graphicDump);
@@ -11,7 +10,6 @@ static void createDotFileTree (const char * nameDotFile, unsigned int timesCreat
 static void createHtmlFileTree(const char * nameFileDump, unsigned int * timesCreatePicture);
 
 static unsigned int	NUMBER_GRAPHICAL_TREE_DUMPS = 0;
-//----------------------------------------------------------------------------------------------------------------
 
 //--------------------------------------------graphical tree dump-------------------------------------------------
 
@@ -55,33 +53,26 @@ void writeNodeToDotFile (const node_t * node, FILE * graphicDump)
 	MY_ASSERT (node == nullptr, "There is no access to the node");
 	MY_ASSERT (graphicDump == nullptr, "There is no access to the file for dump");
 
+	#define DUMP_OPERS(oper, text)																							\
+		if (node->op_t == oper)																								\
+		{																													\
+			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, #text);											\
+		}																													\
+		else
+
+	#define DUMP_KEYWORD(key, text)																							\
+		if (node->key_t == key)																								\
+		{																													\
+			dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, #text);	\
+		}																													\
+		else
+
+
 	if (node->op_t != NO_OP)
 	{
-		if (node->op_t == OP_GR_OR_EQ)
-		{
-			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, ">=");
-		}
-		else if (node->op_t == OP_LESS_OR_EQ)
-		{
-			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, "<=");
-		}
-		else if (node->op_t == OP_LOG_AND)
-		{
-			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, "&&");
-		}
-		else if (node->op_t == OP_LOG_OR)
-		{
-			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, "||");
-		}
-		else if (node->op_t == OP_IDENTITY)
-		{
-			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, "==");
-		}
-		else if (node->op_t == OP_NOT_EQUAL)
-		{
-			dumplineTree ("\t node%p [label=\"%s\", shape=oval];\n", node, "!=");
-		}
-		else
+
+		#include "graphDumpOpers.h"
+
 		{
 			dumplineTree ("\t node%p [label=\"%c\", shape=oval];\n", node, node->op_t);
 		}
@@ -90,47 +81,11 @@ void writeNodeToDotFile (const node_t * node, FILE * graphicDump)
 	{
 		dumplineTree ("\t node%p [label=\"%s\", penwidth=3, shape=rect, color=darkslategray];\n", node, node->name);
 	}
-	else if (node->key_t == PARAM_T)
-	{
-		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "parameter");
-	}
-	else if (node->key_t == RETURN_T)
-	{
-		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "return");
-	}
-	else if (node->key_t == DEFINE_T)
-	{
-		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "define");
-	}
-	else if (node->key_t == INITIALIZER_T)
-	{
-		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "initializer");
-	}
-	else if (node->key_t == FUNC_T)
-	{
-		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "function");
-	}
-	else if (node->key_t == STATEMENT_T)
-	{
-		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "statement");
-	}
-	else if (node->key_t == DECISION_T)
-	{
-		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "decision");
-	}
-	else if (node->key_t == CALL_T)
-	{
-		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "call");
-	}
-	else if (node->key_t == WHILE_T)
-	{
-		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "while");
-	}
-	else if (node->key_t == IF_T)
-	{
-		dumplineTree ("\t node%p [label=\"%s\", shape=parallelogram, style=filled, fillcolor=silver];\n", node, "if");
-	}
-	else if (node->isNum == true)
+	else 
+	
+	#include "graphDumpKeywords.h"	
+
+	if (node->isNum == true)
 	{
 		dumplineTree ("\t node%p [label=\"%lf\", penwidth=3, shape=rect, color=darkgreen];\n", node, node->elem);
 	}
@@ -183,7 +138,7 @@ static void createHtmlFileTree(const char * nameFileDump, unsigned int * timesCr
 	char namePicture[100] = {};
     sprintf (namePicture, "graph%u.png", *timesCreatePicture);
 
-	printf ("namePicture = %s\n", namePicture);
+	// printf ("namePicture = %s\n", namePicture);
 
 	fprintf (treeHTML, "<img src=\"%s\" alt=\"dump РІвЂћвЂ“%u\">\n", namePicture, *timesCreatePicture);
 	fprintf (treeHTML, "<hr>\n\n");
@@ -193,8 +148,3 @@ static void createHtmlFileTree(const char * nameFileDump, unsigned int * timesCr
     fflush (treeHTML);
     fclose (treeHTML);
 }
-
-//---------------------------------------------------------------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------------------------------------------------------------

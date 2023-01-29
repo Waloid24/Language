@@ -7,29 +7,17 @@
 		fprintf (textDump, "\"%s\"", text, ##__VA_ARGS__)
 
 static void dumpTree (node_t * node, FILE * textDump);
-static FILE * createFile (char * name);
 
 void textTree (node_t * node, char * name)
 {
     MY_ASSERT (node == nullptr, "There is no access to the tree");
 
-    FILE * nameFile = createFile (name);
+    FILE * nameFile = openFile (name, "w");
 
     dumpTree (node, nameFile);
 
     fclose (nameFile);
 }   
-
-static FILE * createFile (char * name)
-{
-    MY_ASSERT (name == nullptr, "There is no access to the file name");
-
-    FILE * file = fopen (name, "w");
-	MY_ASSERT (file == nullptr, "Unable to open the file for graphic dump");
-    setbuf (file, NULL);
-
-    return file;
-}
 
 static void dumpTree (node_t * node, FILE * textDump)
 {

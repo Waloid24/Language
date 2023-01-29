@@ -98,10 +98,10 @@ node_t * createNodeWithFunction (char * funcName)
 	node->id_t = ID_FUNC;
 	node->name = funcName;
 
-	#define BASE_FUNC(name, type)		\
+	#define BASE_FUNC(name, type)			\
 		if ((strcmp (funcName, name) == 0))	\
 		{									\
-			node->b_func_t = type;		\
+			node->b_func_t = type;			\
 		}									\
 		else
 

@@ -1,4 +1,10 @@
-#include "frontend.h"
+#include "MY_ASSERT.h"
+#include "lexer.h"
+#include "parser.h"
+#include "graphDumpTree.h"
+#include "textTree.h"
+#include "simplify.h"
+#include "getCode.h"
 
 #define DEF_CMD(nameCmd, value, ...)\
     const int nameCmd = value;
@@ -9,14 +15,16 @@
 
 int main (int argc, char * argv[])
 {
-    MY_ASSERT (argc != 3, "Too few argument in a command line");
+    MY_ASSERT (argc != 4, "Too few argument in a command line");
 
     char * code = getCode (argv[1]);
 
-    retLex_t tokenResult = getTokens (code);
+    retLex_t tokenResult = getTokens (code, argv[3]);
     token_t * tmp = tokenResult.tokens;
 
     node_t * node = getGeneral(&tmp);
+
+    simplify (&node);
 
     graphicDumpTree (node);
 

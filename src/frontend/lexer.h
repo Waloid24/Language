@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "MY_ASSERT.h"
+#include "getCode.h"
 
 typedef double elem_t;
 
@@ -26,7 +27,6 @@ typedef struct retLex retLex_t;
 
 const size_t STANDART_SIZE_TOKEN_ARR = 10;
 
-char * getCode (const char * nameFile);
-retLex_t getTokens(char *code);
+retLex_t getTokens (char * code, char * nameLogFile);
 
 #endif
