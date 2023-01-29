@@ -1,4 +1,5 @@
 #include "tree.h"
+#include "getCode.h"
 #include "../frontend/graphDumpTree.h"
 #include "../frontend/myStrcmp.h"
 
@@ -8,8 +9,7 @@ bool IS_MAIN = false;
 
 node_t * createNodeWithNum (elem_t num)
 {
-	node_t * node = (node_t *) calloc (1, sizeof(node_t));
-	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
+	node_t * node = (node_t *) allocateMemory (1, sizeof(node_t));
 
 	node->isNum = true;
 	node->elem = num;
@@ -19,11 +19,7 @@ node_t * createNodeWithNum (elem_t num)
 
 node_t * createNodeWithOperation (enum operation oper, node_t * nodeL, node_t * nodeR, const char * operName)
 {
-	// MY_ASSERT (nodeL == nullptr, "There is no access to the left node");
-	// MY_ASSERT (nodeR == nullptr, "There is no access to the right node");
-
-	node_t * node = (node_t *) calloc (1, sizeof(node_t));
-	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
+	node_t * node = (node_t *) allocateMemory (1, sizeof(node_t));
 
 	if (oper != OP_SUB			&&
 		oper != OP_ADD			&&
@@ -44,8 +40,6 @@ node_t * createNodeWithOperation (enum operation oper, node_t * nodeL, node_t * 
 
 	node->left = nodeL;
 	node->right = nodeR;
-	// nodeL->parent = node;
-	// nodeR->parent = node;
 	node->op_t = oper;
 
 	node->supportName = operName;
@@ -55,8 +49,7 @@ node_t * createNodeWithOperation (enum operation oper, node_t * nodeL, node_t * 
 
 node_t * createKeyNode (enum keyword type, node_t * nodeL, node_t * nodeR, const char * supportName)
 {
-	node_t * node = (node_t *) calloc (1, sizeof(node_t));
-	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
+	node_t * node = (node_t *) allocateMemory (1, sizeof(node_t));
 
 	node->key_t = type;
 
@@ -80,8 +73,7 @@ node_t * createKeyNode (enum keyword type, node_t * nodeL, node_t * nodeR, const
 node_t * createNodeWithVariable (char * variableName)
 {
 	MY_ASSERT (variableName == nullptr, "There is no access to the variable name");
-	node_t * node = (node_t *) calloc (1, sizeof(node_t));
-	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
+	node_t * node = (node_t *) allocateMemory (1, sizeof(node_t));
 
 	node->id_t = ID_VAR;
 	node->name = variableName;
@@ -92,8 +84,7 @@ node_t * createNodeWithVariable (char * variableName)
 node_t * createNodeWithFunction (char * funcName)
 {
 	MY_ASSERT (funcName == nullptr, "There is no access to the variable name");
-	node_t * node = (node_t *) calloc (1, sizeof(node_t));
-	MY_ASSERT (node == nullptr, "Unable to allocate new memory");
+	node_t * node = (node_t *) allocateMemory (1, sizeof(node_t));
 
 	node->id_t = ID_FUNC;
 	node->name = funcName;
@@ -126,8 +117,7 @@ node_t * createNodeWithFunction (char * funcName)
 node_t * copyNode (node_t * nodeForCopy)
 {
 	MY_ASSERT (nodeForCopy == nullptr, "There is no access to node");
-	node_t * newNode = (node_t *) calloc (1, sizeof (node_t));
-	MY_ASSERT (newNode == nullptr, "Unable to allocate new memory");
+	node_t * newNode = (node_t *) allocateMemory (1, sizeof(node_t));
 	*newNode = *nodeForCopy;
 
 	if (nodeForCopy->left != nullptr)
@@ -160,7 +150,7 @@ void deleteTree (node_t * node)
         deleteTree (node->right);
     }
 
-	if (node->id_t == ID_FUNC || node->id_t == ID_VAR) //TODO: исправить на node->id_t != 0
+	if (node->id_t != NO_ID)
 	{
 		free (node->name);
 	}

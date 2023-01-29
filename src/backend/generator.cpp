@@ -7,7 +7,7 @@ node_t * createTree (char ** code)
 {
     MY_ASSERT (code == nullptr, "There is no access to the code");
 
-    $code (*code)
+    // $code (*code)
 
     char * word = getWord (*code);
     char * tmpWord = word;
@@ -68,9 +68,9 @@ node_t * createTree (char ** code)
 
     *code = *code + lengthWord;
 
-    $str ("lengthWord = %zu", lengthWord)
-    $node (node)
-    $code (*code)
+    // $str ("lengthWord = %zu", lengthWord)
+    // $node (node)
+    // $code (*code)
 
     MY_ASSERT (**code != '(' && **code != ')', "Error in reading the code");
 
@@ -88,7 +88,7 @@ node_t * createTree (char ** code)
         }
     }
 
-    $code (*code)
+    // $code (*code)
     MY_ASSERT (**code != ')', "Error in reading the code");
     (*code)++;
     MY_ASSERT (**code != '(', "Error in reading the code");
@@ -130,7 +130,6 @@ node_t * createTree (char ** code)
         char * name = node->left->name;
         deleteNode (node->left);
         node->left = createNodeWithFunction (name);
-        graphicDumpTree (node->left);
     }
 
     return node;
@@ -144,8 +143,7 @@ static char * deleteQuotMarks (char * word)
     lengthWord = lengthWord - 2;
     word++;
 
-    char * newWord = (char *) calloc (lengthWord+1, sizeof(char));
-
+    char * newWord = (char *) allocateMemory (lengthWord + 1, sizeof(char));
     newWord = (char *) memmove (newWord, word, lengthWord);
     newWord[lengthWord] = '\0';
 
@@ -170,9 +168,7 @@ static char * getWord(char * str)
         return nullptr;
     }
 
-    char * word = (char *) calloc (lengthWord + 1, sizeof(char));
-    MY_ASSERT(word == nullptr, "Unable to allocate new memory");
-
+    char * word = (char *) allocateMemory (lengthWord + 1, sizeof(char));
     word = (char *) memmove (word, tmp, lengthWord * sizeof(char));
     word[lengthWord] = '\0';
 

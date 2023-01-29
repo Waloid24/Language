@@ -1,10 +1,10 @@
 #include "getCode.h"
 
-static FILE * openFile(const char * nameFile)
+FILE * openFile(const char * nameFile, const char * mode)
 {
     MY_ASSERT (nameFile == nullptr, "Wrong pointer to name file with source code");
 
-    FILE *file = fopen (nameFile, "rb");
+    FILE *file = fopen (nameFile, mode);
     MY_ASSERT (file == nullptr, "Unable to open the source file");
 
     return file;
@@ -18,7 +18,7 @@ static size_t sizeFile (const char * argConsole)
     return (size_t)code.st_size;
 }
 
-static void * createArr (size_t size, size_t sizeElem)
+void * allocateMemory (size_t size, size_t sizeElem)
 {
     void * ptrToArr = calloc (size, sizeElem);
     MY_ASSERT (ptrToArr == nullptr, "Unable to allocate new memory");
@@ -35,9 +35,9 @@ static void copyFromFile (FILE * src, void * dst, size_t sizeFile)
 
 char * getCode (const char * nameFile)
 {
-    FILE * fileCode = openFile (nameFile);
+    FILE * fileCode = openFile (nameFile, "rb");
     size_t sizeArr = sizeFile (nameFile);
-    char * code = (char *) createArr(sizeArr + 1, sizeof(char));
+    char * code = (char *) allocateMemory (sizeArr + 1, sizeof(char));
     copyFromFile (fileCode, code, sizeArr);
     code[sizeArr] = '\0';
 

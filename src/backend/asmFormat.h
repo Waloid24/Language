@@ -3,6 +3,7 @@
 
 #include "tree.h"
 #include "MY_ASSERT.h"
+#include "getCode.h"
 
 typedef struct {
     char * name;
