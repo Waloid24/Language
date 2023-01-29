@@ -101,7 +101,6 @@ void   stack_dtor       (stack_t *  stk);
 
 //Output
 void   stack_dump       (stack_t stk, FILE * log_file);
-size_t dump_call_num    (void);
 
 //Service function
 void * stack_recalloc   (void * memblock, size_t n_memb, size_t size_memb);

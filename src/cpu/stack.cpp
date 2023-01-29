@@ -2,6 +2,7 @@
 #define LONG_LINE "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n"
 #include "stack.h"
 
+size_t DUMP_CALL_NUM = 0;
 
 void stack_ctor (stack_t * stk, size_t capacity, const char * name_stk, 
                  size_t create_line, const char * create_func, const char * create_file)
@@ -22,7 +23,8 @@ void stack_ctor (stack_t * stk, size_t capacity, const char * name_stk,
     stk -> ptr_canary_hashsum  = (canary_t *) data;
     stk -> data = (elem_t *) (data + sizeof(canary_t));
     stk -> ptr_canary_data = (canary_t *) (data + sizeof(canary_t) + (stk->capacity)*sizeof(elem_t));
-    *(stk -> ptr_canary_data) = BUF_CNR_SCND;
+    // *(stk -> ptr_canary_data) = BUF_CNR_SCND;
+    stk -> ptr_canary_data = (canary_t *) memmove (stk->ptr_canary_data, &BUF_CNR_SCND, sizeof(canary_t)); // has been added
 
     for (size_t i = 0; i < stk->capacity; i++)
     {
@@ -122,21 +124,14 @@ void stack_dump (stack_t stk, FILE * log_file)
         fprintf (log_file, "%d, ", *((elem_t*)((char *)stk.data + i * sizeof(elem_t))));
     }
     fprintf (log_file, "\n");
-    fprintf (log_file, "Second canary in data: %llX\n", *(stk.ptr_canary_data));
+    canary_t canary_support = 0;
+    memmove (&canary_support, stk.ptr_canary_data, sizeof (canary_t));
+    fprintf (log_file, "Second canary in data: %llX\n", canary_support);
 
-    
-    //printf ("5\n");
     fprintf (log_file, "\nNumber of members = %d, capacity = %zu\n", stk.n_memb, stk.capacity);
     fprintf (log_file, "stk was created in file = %s, in func = %s, in strings = %zu\n", stk.name_file_create, stk.name_func_create, stk.line_create);
     fprintf (log_file, LONG_LINE);
     fflush  (log_file);
-}
-
-size_t dump_call_num (void)
-{
-    static size_t count = 0;
-    count++;
-    return count;
 }
 
 void * stack_recalloc (void * memblock, size_t n_memb, size_t size_memb)
@@ -157,8 +152,6 @@ void stack_resize (stack_t * stk, int mode)
     {
         stk->capacity *= RESIZE;
         canary_t temp     = *(stk->ptr_canary_data);
-        //printf ("in resize before recalloc stk->ptr_canary_data = %p\n", stk->ptr_canary_data);
-        //printf ("The value of stk->ptr_canary_data BEFORE resize = %llX\n", *(stk->ptr_canary_data));
 
         char * ptr = (char *) stack_recalloc (stk->ptr_canary_hashsum, (stk->capacity)*sizeof(elem_t) + 2*sizeof(hash_t), sizeof(char));
 
@@ -173,19 +166,11 @@ void stack_resize (stack_t * stk, int mode)
         {
             *(stk->data + i + stk->n_memb) = POISON_ELEM_STK;
         }
-
-        //stk->ptr_canary_hashsum = (canary_t *) ptr;
-        //printf ("in resize after recalloc stk->ptr_canary_data = %p\n", stk->ptr_canary_data);
-        //printf ("The value of stk->ptr_canary_data AFTER resize = %llX\n", *(stk->ptr_canary_data));
-        //check_err (); stk->data != nullptr
     }
     else if (mode == REDUCE)
     {
         stk->capacity /= RESIZE;
         canary_t temp = *(stk->ptr_canary_data);
-
-        //printf ("in resize before recalloc stk->ptr_canary_data = %p\n", stk->ptr_canary_data);
-        //printf ("The value of stk->ptr_canary_data BEFORE resize = %llX\n", *(stk->ptr_canary_data));
 
         char * ptr = (char *) stack_recalloc (stk->ptr_canary_hashsum, (stk->capacity)*sizeof(elem_t) + 2*sizeof(hash_t), sizeof(char));
 
@@ -200,7 +185,6 @@ void stack_resize (stack_t * stk, int mode)
         {
             *(stk->data + i + stk->n_memb) = POISON_ELEM_STK;
         }
-
     }
     else 
     {
@@ -239,18 +223,18 @@ int struct_validator (stack_t * stk, FILE * log)
 {
     log_ok ();
 
+    canary_t canary_support = 0;
+    memmove (&canary_support, stk->ptr_canary_data, sizeof (canary_t));
+
     int err_sum = NOERR_STK;
-    //printf ("inside str_validator\n");
     if (stk == nullptr)
     {
-        //printf ("stk == nullptr\n");
         LOGDUMP(NO, log, stk, "The pointer to the stack is null", YES);
         fclose (log);
         err_sum |= PTR_STK_NULL;
     }
     if (stk->n_memb > (int)stk->capacity)
     {
-        //printf ("stk->n_memb > stk->capacity\n");
         LOGDUMP(YES, log, stk, "The number of members in the buffer is greater than its capacity", YES);
         fclose (log);
         free (stk->data);
@@ -258,52 +242,42 @@ int struct_validator (stack_t * stk, FILE * log)
     }
     if (stk->data == nullptr)
     {
-        //printf ("stk->data == nullptr\n");
         LOGDUMP(NO, log, stk, "The pointer to buffer is null", YES);
         fclose (log);
         err_sum |= PTR_BUF_NULL_STK;
     } 
     if (stk->ptr_canary_hashsum == nullptr)
     {
-        //printf ("stk->ptr_canary_hashsum == nullptr\n");
         LOGDUMP(NO, log, stk, "The pointer to hash-sum of buffer is null", YES);
         fclose (log);
         err_sum |= BAD_PTR_BUF_HASH_STK;
     }
     if (stk->ptr_canary_data == nullptr)
     {
-        //printf ("stk->ptr_canary_data == nullptr\n");
         LOGDUMP(NO, log, stk, "The pointer to second buffer canary is null", YES);
         fclose (log);
         err_sum |= BAD_PTR_BUF_CANARY_STK;
     }
     if (*(stk->ptr_canary_hashsum) != calculate_hash (stk->data, sizeof(sizeof(hash_t) + (stk->capacity)*sizeof(elem_t))))
     {
-        //printf ("*(stk->ptr_canary_hashsum) = %llX\n", *(stk->ptr_canary_hashsum));
-        //printf ("stk->hash_buf != calculate_hash\n");
         LOGDUMP(YES, log, stk, "Hashsum of buffer isn't correct", YES);
         fclose (log);
         err_sum |= BAD_BUF_HASH_STK;
     }
-    if (*(stk->ptr_canary_data) != BUF_CNR_SCND)
+    if (canary_support != BUF_CNR_SCND)
     {
-        //printf ("*(stk->ptr_canary_data) != BUF_CNR_SCND\n");
-        //printf ("*(stk->ptr_canary_data) = %llX\n", *(stk->ptr_canary_data));
         LOGDUMP(YES, log, stk, "The second buffer canary died", YES);
         fclose (log);
         err_sum |= BAD_BUF_CAN_SCND_STK;
     }
     if (stk->hashsum_stack != calculate_hash ((char*)stk + (char) sizeof (canary_t), sizeof(stack_t)-sizeof(canary_t)))
     {
-        //printf ("stk->hashsum_stack == %llX", calculate_hash ((char*)stk + (char) sizeof (canary_t), sizeof(stack_t)-sizeof(canary_t)));
-        //printf ("stk->hashsum_stack != calculate_hash\n");
         LOGDUMP(YES, log, stk, "Hashsum of stack isn't correct", YES);
         fclose (log);
         err_sum |= BAD_STK_HASH;
     }
     if (stk->stk_cnr_second != STK_CNR_SCND)
     {
-        //printf ("stk->stk_cnr_second != STK_CNR_SCND\n");
         LOGDUMP(YES, log, stk, "The second canary died", YES);
         fclose (log);
         err_sum |= BAD_STK_CAN_SCND;
@@ -312,23 +286,20 @@ int struct_validator (stack_t * stk, FILE * log)
     {
         if (*(stk->data + i + stk->n_memb) != POISON_ELEM_STK)
         {
-            //printf ("*((elem_t *)stk->data + (elem_t)i + (elem_t)stk->n_memb) = %d\n", *((elem_t *)stk->data + (elem_t)i + (elem_t)stk->n_memb));
-            //printf ("Poison isn't poison! ^_^\n");
             LOGDUMP(YES, log, stk, "The value of the poison cell has been changed", YES);
             fclose (log);
             err_sum |= BAD_POISON_STK;
         }
     }
-    // LOGDUMP (YES, log, stk, "Hashsum of stack isn't correct", NO);
     
     return err_sum;
 }
-// использовать только перед struct_validator, ведь только там он используется, потом undef
+
 void decoder (int value_elem)
 {
     int count_of_err[32] = {0};
 
-    if ((value_elem & PTR_STK_NULL)         == 1) 
+    if ((value_elem & PTR_STK_NULL)             == 1) 
     {
         count_of_err[1] = 1;
     }
@@ -348,7 +319,7 @@ void decoder (int value_elem)
     {  
         count_of_err[5] = 1;
     }
-    if ((value_elem & BAD_STK_CAN_SCND)     == 32)
+    if ((value_elem & BAD_STK_CAN_SCND)         == 32)
     {
         count_of_err[6] = 1;
     }
@@ -357,7 +328,7 @@ void decoder (int value_elem)
     {
         count_of_err[7] = 1;
     }
-    if ((value_elem & BAD_STK_HASH)         == 128)
+    if ((value_elem & BAD_STK_HASH)             == 128)
     {
         count_of_err[8] = 1;
     }
@@ -405,7 +376,8 @@ void logdump_hidden (unsigned char can_print, FILE * stack_log, stack_t * stk, c
                      const char* call_file, unsigned int call_line)
 {
     MY_ASSERT (stk == nullptr, "There is no access to stk");
-    size_t num = dump_call_num ();
+    size_t num = DUMP_CALL_NUM;
+    DUMP_CALL_NUM++;
     printf ("Number of the \"LOGDUMP\" function call is %zu\n", num);
     if (is_err)
     {
@@ -439,7 +411,6 @@ FILE * open_logfile (const char * name_logfile)
 
 void stk_ok (stack_t * stk, FILE * log)
 {
-    // printf ("STK_OK\n");
     int sum_err = 0;
     if ((sum_err = struct_validator(stk, log)) != NOERR_STK)
     {

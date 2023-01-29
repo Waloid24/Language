@@ -48,7 +48,6 @@ size_t readNumStrs (FILE * binFile)
 
     int nStrs = -1;
     fread (&nStrs, sizeof(int), 1, binFile);
-    printf ("in getCode: nStrs = %d\n", nStrs);
     MY_ASSERT (nStrs < 0, "The file is empty");
 
     return (size_t)nStrs;
@@ -136,7 +135,6 @@ void cpu (int * code, size_t nStrs, size_t numTags, FILE * binFile)
             code = increaseMemSize (code, STANDART_SIZE_CODE, binFile);
         }
         cmd = (code[i] & MASK);
-        printf ("cmd = %d\n", cmd);
         if ((checkBit(code[i], NUM) == 1) && 
             (checkBit(code[i], REG) == 0) && 
             (checkBit(code[i], RAM) == 0)) //push 7 / pop
