@@ -14,7 +14,7 @@ Program starts with the `main` function, which cannot be called. Functions can b
 
 ## Grammar
 ```
-Define          ::= TYPE_ID '(' {TYPE_ID {',' TYPE_ID}* }? ')' '{' Statement+ '}'
+    Define          ::= TYPE_ID '(' {TYPE_ID {',' TYPE_ID}* }? ')' '{' Statement+ '}'
 
     Statement       ::= Assign          |
                         Conditional     |
