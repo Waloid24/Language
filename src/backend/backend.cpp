@@ -11,6 +11,8 @@ int main (int argc, char * argv[])
 
     asmFormat (node, argv[2]);
 
+    graphicDumpTree (node);
+
     deleteTree (node);
 
     free (tmpCode);

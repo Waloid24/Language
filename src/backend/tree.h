@@ -27,7 +27,8 @@ enum keyword {
     CONST_T         = 9,
     MAIN_T          = 10,
     CALL_T          = 11,
-    INITIALIZER_T   = 12
+    INITIALIZER_T   = 12,
+    HLT_T           = 13
 };
 
 enum operation {

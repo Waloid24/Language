@@ -42,7 +42,7 @@ node_t * createTree (char ** code)
         isQuotMarks = true;
         free (tmpWord);
     }
-    else if ((word[0] >= 48 && word[0] <= 57 && isalpha(word[1]) == 0) ||
+    else if ((word[0] >= 48 && word[0] <= 57 && (isalpha(word[1]) == 0 || word[1] == '.' || word[1] == ',')) ||
             (word[0] == '-' && word[1] >= 48 && word[1] <= 57))
     {
         node = createNodeWithNum (atoi(word));
@@ -53,6 +53,7 @@ node_t * createTree (char ** code)
     #include "operations.h"
 
     {
+        printf ("word = %s\n", word);
         MY_ASSERT (1, "Something error");
     }
 

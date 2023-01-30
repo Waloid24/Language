@@ -1,19 +1,18 @@
 #include "asmFormat.h"
 
-static FILE * createFile (char * nameFile);
 static void filledFile (node_t * node, FILE * asmFile, var_t ** tableGlobVars);
 static void processDefineParams (node_t * node, FILE * asmFile, var_t ** tableGlobVars, var_t ** tableLocalVars, size_t * numVars);
 static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVars, var_t ** tableLocalVars, size_t * numVars);
-static void processExpr (node_t * node, FILE * asmFile, var_t ** tableGlobVars, var_t ** tableLocalVars, size_t * numVars);
-static void processCallParams (node_t * node, FILE * asmFile, var_t ** tableGlobVars, var_t ** tableLocalVars, size_t * numVars, bool toStack);
+static void processExpr (node_t * node, FILE * asmFile, var_t ** tableGlobVars, var_t ** tableLocalVars, size_t * numVars, bool toStack);
 static void processAssign (node_t * node, FILE * asmFile, var_t ** tableGlobVars, var_t ** tableLocalVars, size_t * numVars);
 
 #define printAsm(text, ...)         \
         fprintf (asmFile, text, ##__VA_ARGS__)
 
-size_t NUM_WHILE = 0;
-size_t NUM_ELSE = 0;
-size_t NUM_GLOB_VARS = 0;
+size_t NUM_WHILE        = 0;
+size_t NUM_ELSE         = 0;
+size_t NUM_GLOB_VARS    = 0;
+size_t NUM_IF           = 0;
 
 void asmFormat (node_t * node, char * nameFile)
 {
@@ -71,7 +70,7 @@ static void filledFile (node_t * node, FILE * asmFile, var_t ** tableGlobVars)
             MY_ASSERT (1, "The limit on the number of global variables has been reached. Buy more RAM");
         }
         
-        processExpr (node->right->right, asmFile, tableGlobVars, nullptr, nullptr);
+        processExpr (node->right->right, asmFile, tableGlobVars, nullptr, nullptr, true);
         
         for (size_t i = 0; i < MAX_NUM_GLOB_VARS; i++)
         {
@@ -177,29 +176,45 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
         return ; 
     }
 
+    if (node->key_t == HLT_T)
+    {
+        printAsm ("hlt;\n");
+    }
+
     if (node->key_t == RETURN_T)
     {
-        processExpr (node->right, asmFile, tableGlobVars, tableLocalVars, numVars);
+        processExpr (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
+        printAsm ("ret;\n");
         return ; 
     }
 
     if (node->key_t == IF_T)
     {
-        processExpr (node->left, asmFile, tableGlobVars, tableLocalVars, numVars);
+        processExpr (node->left, asmFile, tableGlobVars, tableLocalVars, numVars, true);
         printAsm ("push 0;\n");
-        size_t tmp = NUM_ELSE;
+        size_t tmpElse = NUM_ELSE;
         if (node->right->right != nullptr)
         {
             printAsm ("je else%zu:;\n", NUM_ELSE);
             NUM_ELSE++;
         }
+        if (node->right->right == nullptr)
+        {
+            printAsm ("je afterIf%zu:;\n", NUM_IF);
+        }
+        size_t tmpIf = NUM_IF;
         processFuncBody (node->right->left, asmFile, tableGlobVars, tableLocalVars, numVars);
-        printAsm ("jmp elseExit%zu:;\n", tmp);
+
         if (node->right->right != nullptr)
         {
-            printAsm ("else%zu:;\n", tmp);
+            printAsm ("jmp elseExit%zu:;\n", tmpElse);
+            printAsm ("else%zu:;\n", tmpElse);
             processFuncBody (node->right->right, asmFile, tableGlobVars, tableLocalVars, numVars);
-            printAsm ("elseExit%zu:;\n", tmp);
+            printAsm ("elseExit%zu:;\n", tmpElse);
+        }
+        if (node->right->right == nullptr)
+        {
+            printAsm ("afterIf%zu:;\n", tmpIf);
         }
         return ;
     }
@@ -209,11 +224,11 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
         printAsm ("while%zu:;\n", NUM_WHILE);
         size_t tmp = NUM_WHILE;
         NUM_WHILE++;
-        processExpr (node->left, asmFile, tableGlobVars, tableLocalVars, numVars);
+        processExpr (node->left, asmFile, tableGlobVars, tableLocalVars, numVars, true);
         printAsm ("push 0;\n");
         printAsm ("je endWhile%zu:;\n", tmp);
         processFuncBody (node->right, asmFile, tableGlobVars, tableLocalVars, numVars);
-        processExpr (node->left, asmFile, tableGlobVars, tableLocalVars, numVars);
+        processExpr (node->left, asmFile, tableGlobVars, tableLocalVars, numVars, true);
         printAsm ("push 0;\n");
         printAsm ("jne while%zu:;\n", tmp);
         printAsm ("endWhile%zu:;\n", tmp);
@@ -221,10 +236,10 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
     }
 
     #define CALLS_BASE_FUNC(nameFunc, type)                                                                 \
-        if (node->left->b_func_t == type)                                                                  \
+        if (node->left->b_func_t == type)                                                                   \
         {                                                                                                   \
             MY_ASSERT (node->right == nullptr, "This function must have a parameter");                      \
-            processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);         \
+            processExpr (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);               \
             printAsm ("%s;\n", #nameFunc);                                                                  \
         }                                                                                                   \
         else
@@ -233,7 +248,7 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
     {
         if (node->left->b_func_t == PRINT_T)
         {
-            processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
+            processExpr (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
             printAsm ("out;\n");
         }
         else if (node->left->b_func_t == SCAN_T)
@@ -241,7 +256,7 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
             if (node->right != nullptr)
             {
                 printAsm ("in;\n");
-                processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, false);
+                processExpr (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, false);
             }
             else
             {
@@ -255,8 +270,8 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
 
 
         {
-            processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
-            printAsm ("jmp %s:;\n", node->left->name);
+            processExpr (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
+            printAsm ("call %s:;\n", node->left->name);
         }
         return ;
     }
@@ -273,7 +288,7 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
 
 }
 
-static void processExpr (node_t * node, FILE * asmFile, var_t ** tableGlobVars, var_t ** tableLocalVars, size_t * numVars)
+static void processExpr (node_t * node, FILE * asmFile, var_t ** tableGlobVars, var_t ** tableLocalVars, size_t * numVars, bool toStack)
 {
     MY_ASSERT (asmFile == nullptr, "No access to the file");
     MY_ASSERT (tableGlobVars == nullptr, "No access to the variable table");
@@ -286,8 +301,8 @@ static void processExpr (node_t * node, FILE * asmFile, var_t ** tableGlobVars, 
 
 
         {
-            processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
-            printAsm ("jmp %s:;\n", node->left->name);
+            processExpr (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, toStack);
+            printAsm ("call %s:;\n", node->left->name);
         }
         #undef CALLS_BASE_FUNC
         return ;
@@ -295,81 +310,17 @@ static void processExpr (node_t * node, FILE * asmFile, var_t ** tableGlobVars, 
 
     if (node->left != nullptr)
     {
-        processExpr (node->left, asmFile, tableGlobVars, tableLocalVars, numVars);
+        processExpr (node->left, asmFile, tableGlobVars, tableLocalVars, numVars, toStack);
     }
 
     if (node->right != nullptr)
     {
-        processExpr (node->right, asmFile, tableGlobVars, tableLocalVars, numVars);
+        processExpr (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, toStack);
     }
 
     if (node->isNum == true)
     {
         printAsm ("push %.0lf;\n", node->elem);
-    }
-
-    if (node->id_t == ID_VAR)
-    {
-        bool isVarInTable = false;
-        if (tableLocalVars != nullptr)
-        {
-            for (size_t i = 0; i < *numVars; i++)
-            {
-                if (strcmp (node->name, (*tableLocalVars)[i].name) == 0)
-                {
-                    printAsm ("push [rbx + %zu];\n", (*tableLocalVars)[i].num);
-                    isVarInTable = true;
-                    break;
-                }
-            }
-        }
-        if (isVarInTable == false)
-        {
-            for (size_t i = 0; i < NUM_GLOB_VARS; i++)
-            {
-                if (strcmp (node->name, (*tableGlobVars)[i].name) == 0)
-                {
-                    printAsm ("push [rax + %zu];\n", (*tableGlobVars)[i].num);
-                    isVarInTable = true;
-                    break;
-                }
-            }
-        }
-        if (isVarInTable == false)
-        {
-            printf ("\033[31m VAR: %s \033[0m \n", node->name);
-            MY_ASSERT (1, "undeclared variable");
-        }
-    }
-
-    #define OPERS(oper, cmdAsm)             \
-        if (node->op_t == oper)             \
-        {                                   \
-            printAsm ("%s;\n", #cmdAsm);    \
-        }               
-    
-    #include "GEN_OPER_ASM.h"
-
-    #undef OPERS
-
-}
-
-static void processCallParams (node_t * node, FILE * asmFile, var_t ** tableGlobVars, var_t ** tableLocalVars, size_t * numVars, bool toStack)
-{
-    MY_ASSERT (asmFile == nullptr, "No access to the file");
-
-    if (node == nullptr)
-    {
-        return ;
-    }
-
-    if (node->left != nullptr)
-    {
-        processCallParams (node->left, asmFile, tableGlobVars, tableLocalVars, numVars, toStack);
-    }
-    if (node->right != nullptr)
-    {
-        processCallParams (node->right, asmFile, tableGlobVars, tableLocalVars, numVars, toStack);
     }
 
     if (node->id_t == ID_VAR)
@@ -415,10 +366,17 @@ static void processCallParams (node_t * node, FILE * asmFile, var_t ** tableGlob
             MY_ASSERT (1, "This variable is not in the table");
         }
     }
-    if (node->isNum == true)
-    {
-        printAsm ("push %.0lf;\n", node->elem);
-    }
+
+    #define OPERS(oper, cmdAsm)             \
+        if (node->op_t == oper)             \
+        {                                   \
+            printAsm ("%s;\n", #cmdAsm);    \
+        }               
+    
+    #include "GEN_OPER_ASM.h"
+
+    #undef OPERS
+
 }
 
 static void processAssign (node_t * node, FILE * asmFile, var_t ** tableGlobVars, var_t ** tableLocalVars, size_t * numVars)
@@ -430,7 +388,7 @@ static void processAssign (node_t * node, FILE * asmFile, var_t ** tableGlobVars
         MY_ASSERT (1, "The limit on the number of variables has been reached. Buy more RAM");
     }
     
-    processExpr (node->right->right, asmFile, tableGlobVars, tableLocalVars, numVars);
+    processExpr (node->right->right, asmFile, tableGlobVars, tableLocalVars, numVars, true);
     
     for (size_t i = 0; i < *numVars; i++)
     {
