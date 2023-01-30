@@ -33,7 +33,7 @@ static void dumpTree (node_t * node, FILE * textDump)
     }
     else if (node->isNum != false)
     {
-        print ("%lf", node->elem);
+        print ("%.0lf", node->elem);
     }
     else
     {

@@ -120,7 +120,8 @@ static void setToken (char *word, token_t *tokens, size_t ip)
 {
     MY_ASSERT(word == nullptr, "There is no access to this word");
     MY_ASSERT(word[0] == '_', "Uncorrect symbol: \'_\' should not be at the beginning of the word");
-    MY_ASSERT((word[0] >= 48 && word[0] <= 57) && ((word[1] < 48 || word[1] > 57)) && strlen(word) > 1, "Uncorrect ...");
+    MY_ASSERT((word[0] >= 48 && word[0] <= 57) && ((word[1] < 48 || word[1] > 57) && (word[1] != '.' && word[1] != ',')) 
+                && strlen(word) > 1, "Uncorrect ...");
 
     #define DEF_CMD(nameCmd, value, terminal)                   \
         if (strcmp (word, terminal) == 0)                       \

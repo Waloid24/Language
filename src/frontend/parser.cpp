@@ -7,21 +7,24 @@
 
 #undef DEF_CMD
 
+#define checkSemicolon(ptrTok, line, file)      \
+        checkSemic (ptrTok, line, file)
+
 size_t STANDART_NUM_OF_INSTRUCTION = 5;
 
 static node_t * getDefine (token_t ** tokens);
-static node_t * getStatement (token_t ** tokens);
+static node_t * getStatement (token_t ** tokens, bool isMain);
 static node_t * getAssign (token_t ** tokens);
-static node_t * getTerminational (token_t ** tokens);
-static node_t * getCycle (token_t ** tokens);
-static node_t * getConditional (token_t ** tokens);
+static node_t * getTerminational (token_t ** tokens, bool isMain);
+static node_t * getCycle (token_t ** tokens, bool isMain);
+static node_t * getConditional (token_t ** tokens, bool isMain);
 static node_t * getExpression (token_t ** tokens);
 static node_t * getBoolean (token_t ** tokens);
 static node_t * getArithmetic (token_t ** tokens);
 static node_t * getTerm (token_t ** tokens);
 static node_t * getPrimary (token_t ** tokens);
 
-static void checkSemicolon (token_t ** tokens);
+static void checkSemic (token_t ** tokens, size_t line, const char * nameFile);
 static node_t ** increaseMemory (node_t ** ptr, size_t * size);
 static node_t * createParams (token_t ** tokens);
 static node_t * getId (token_t ** tokens);
@@ -87,7 +90,14 @@ static node_t * getDefine (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
 
+    bool isMain = false;
+
     node_t * funcName = getFunc (tokens);
+    if (funcName->key_t == MAIN_T)
+    {
+        printf ("This node is main\n");
+        isMain = true;
+    }
 
     MY_ASSERT ((*tokens)->type != TYPE_O_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
     (*tokens)++;
@@ -124,7 +134,7 @@ static node_t * getDefine (token_t ** tokens)
     (*tokens)++;
 
     node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
-    multipleInstructions[0] = getStatement (tokens);
+    multipleInstructions[0] = getStatement (tokens, isMain);
     size_t j = 0;
     for (; (*tokens)->type != TYPE_C_F_BRACKET; j++)
     {
@@ -132,7 +142,7 @@ static node_t * getDefine (token_t ** tokens)
         {
             multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
         }
-        node_t * node = getStatement (tokens);
+        node_t * node = getStatement (tokens, isMain);
         multipleInstructions[j]->parent = node;
         node->left = multipleInstructions[j];
         multipleInstructions[j+1] = node;
@@ -149,18 +159,18 @@ static node_t * getDefine (token_t ** tokens)
     return supportNode;
 }
 
-static node_t * getStatement (token_t ** tokens)
+static node_t * getStatement (token_t ** tokens, bool isMain)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
 
     node_t * node = nullptr;
     if ((*tokens)->type == TYPE_IF)
     {
-        node = getConditional (tokens);
+        node = getConditional (tokens, isMain);
     }
     else if ((*tokens)->type == TYPE_WHILE)
     {
-        node = getCycle (tokens);
+        node = getCycle (tokens, isMain);
     }
     else if ((*tokens + 1)->type == TYPE_ASSIGN)
     {
@@ -168,11 +178,12 @@ static node_t * getStatement (token_t ** tokens)
     }
     else if ((*tokens)->type == TYPE_RETURN)
     {
-        node = getTerminational (tokens);
+        node = getTerminational (tokens, isMain);
     }
     else
     {
         node = getExpression (tokens);
+        checkSemicolon (tokens, __LINE__, __FILE__);
     }
 
     node_t * headNode = createKeyNode (STATEMENT_T, nullptr, node, "STATEMENT");
@@ -193,23 +204,33 @@ static node_t * getAssign (token_t ** tokens)
     node_t * supportNode = createKeyNode (INITIALIZER_T, nullptr, node_1, "INITIALIZER");
     node_t * headNode = createNodeWithOperation (OP_ASSIGN, node, supportNode, "AS");
 
-    checkSemicolon (tokens);
+    checkSemicolon (tokens, __LINE__, __FILE__);
     return headNode;
 }
 
-static node_t * getTerminational (token_t ** tokens)
+static node_t * getTerminational (token_t ** tokens, bool isMain)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
 
     (*tokens)++; //skip 'return'
-    node_t * node = getExpression (tokens);
-    checkSemicolon (tokens);
-    node_t * headNode = createKeyNode (RETURN_T, nullptr, node, "RETURN");
 
-    return headNode;
+    node_t * node = getExpression (tokens);
+    checkSemicolon (tokens, __LINE__, __FILE__);
+
+    if (isMain == true)
+    {
+        printf ("it's main\n");
+        deleteTree (node);
+        return createKeyNode (HLT_T, nullptr, nullptr, "HLT");
+    }
+    else
+    {
+        printf ("NO MAIN\n");
+        return createKeyNode (RETURN_T, nullptr, node, "RETURN");
+    }
 }
 
-static node_t * getCycle (token_t ** tokens)
+static node_t * getCycle (token_t ** tokens, bool isMain)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
     (*tokens)++;
@@ -226,7 +247,7 @@ static node_t * getCycle (token_t ** tokens)
     (*tokens)++;
 
     node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
-    multipleInstructions[0] = getStatement (tokens);
+    multipleInstructions[0] = getStatement (tokens, isMain);
 
     size_t i = 0;
     for (; (*tokens)->type != TYPE_C_F_BRACKET; i++)
@@ -235,7 +256,7 @@ static node_t * getCycle (token_t ** tokens)
         {
             multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
         }
-        node_t * node = getStatement (tokens);
+        node_t * node = getStatement (tokens, isMain);
         multipleInstructions[i]->parent = node;
         node->left = multipleInstructions[i];
         multipleInstructions[i+1] = node;
@@ -256,7 +277,7 @@ static node_t * getCycle (token_t ** tokens)
     return headNode;
 }
 
-static node_t * getConditional (token_t ** tokens)
+static node_t * getConditional (token_t ** tokens, bool isMain)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
     (*tokens)++;
@@ -273,7 +294,7 @@ static node_t * getConditional (token_t ** tokens)
     (*tokens)++;
 
     node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
-    multipleInstructions[0] = getStatement (tokens);
+    multipleInstructions[0] = getStatement (tokens, isMain);
 
     size_t i = 0;
     for (; (*tokens)->type != TYPE_C_F_BRACKET; i++)
@@ -282,7 +303,7 @@ static node_t * getConditional (token_t ** tokens)
         {
             multipleInstructions = increaseMemory (multipleInstructions, &STANDART_NUM_OF_INSTRUCTION);
         }
-        node_t * node = getStatement (tokens);
+        node_t * node = getStatement (tokens, isMain);
         multipleInstructions[i]->parent = node;
         node->left = multipleInstructions[i];
         multipleInstructions[i+1] = node;
@@ -297,7 +318,7 @@ static node_t * getConditional (token_t ** tokens)
         MY_ASSERT ((*tokens)->type != TYPE_O_F_BRACKET, "\033[1;31m The condition in if must always be surrounded by parentheses \033[0m");
         (*tokens)++;        
 
-        multipleInstructionsElse[0] = getStatement (tokens);
+        multipleInstructionsElse[0] = getStatement (tokens, isMain);
 
         for (; (*tokens)->type != TYPE_C_F_BRACKET; j++)
         {
@@ -305,7 +326,7 @@ static node_t * getConditional (token_t ** tokens)
             {
                 multipleInstructionsElse = increaseMemory (multipleInstructionsElse, &STANDART_NUM_OF_INSTRUCTION);
             }
-            node_t * node = getStatement (tokens);
+            node_t * node = getStatement (tokens, isMain);
             multipleInstructionsElse[j]->parent = node;
             node->left = multipleInstructionsElse[j];
             multipleInstructionsElse[j+1] = node;
@@ -396,7 +417,7 @@ static node_t * getArithmetic (token_t ** tokens)
 {
     MY_ASSERT (tokens == nullptr, "There access to tokens");    
 
-    node_t * node = getTerm (tokens); // TODO: there is a lot of shit, man...
+    node_t * node = getTerm (tokens);
     if ((*tokens)->type == TYPE_ADD || (*tokens)->type == TYPE_SUB)
     {
         node_t ** multipleInstructions = (node_t **) allocateMemory (STANDART_NUM_OF_INSTRUCTION, sizeof(node_t *));
@@ -541,11 +562,7 @@ static node_t * getPrimary (token_t ** tokens)
         (*tokens)++;
         
         node_t * headNode = createKeyNode (CALL_T, funcName, multipleInstructions[i], "CALL");
-        graphicDumpTree (headNode);
-        if ((*tokens)->type == TYPE_SEMICOLON)
-        {
-            (*tokens)++;
-        }
+
         free (multipleInstructions);
         return headNode;
     }
@@ -588,13 +605,16 @@ static node_t ** increaseMemory (node_t ** ptr, size_t * size)
     return ptr;
 }
 
-static void checkSemicolon (token_t ** tokens)
+static void checkSemic (token_t ** tokens, size_t line, const char * nameFile)
 {
     MY_ASSERT (tokens == nullptr, "No access to tokens");
+    MY_ASSERT (nameFile == nullptr, "There is no access to the file");
 
     if ((*tokens)->type != TYPE_SEMICOLON)
     {
-        MY_ASSERT (1, "The expression must end with a semicolon");
+        fprintf (stderr, "Semicolon omitted\n");
+        fprintf (stderr, "file = %s, line: %zu\n", nameFile, line);
+        MY_ASSERT (1, "n");
     }
     (*tokens)++;
 }

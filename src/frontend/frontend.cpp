@@ -26,8 +26,6 @@ int main (int argc, char * argv[])
 
     simplify (&node);
 
-    graphicDumpTree (node);
-
     textTree (node, argv[2]);
 
     free (code);
