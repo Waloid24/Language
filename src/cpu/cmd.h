@@ -16,7 +16,7 @@ DEF_CMD (SUB,  3, 4,  NO,
 {
     int n1 = stack_pop (&stk, logfile);
     int n2 = stack_pop (&stk, logfile);
-    stack_push (&stk, n2 - n1, logfile); //было n2 - n1
+    stack_push (&stk, n2 - n1, logfile);
 })
 DEF_CMD (MUL,  3, 5,  NO,
 {
@@ -28,7 +28,7 @@ DEF_CMD (DIV,  3, 6,  NO,
 {
     int n1 = stack_pop (&stk, logfile);
     int n2 = stack_pop (&stk, logfile);
-    stack_push (&stk, n2 / n1, logfile); //было n2 / n1
+    stack_push (&stk, n2 / n1, logfile);
 })
 DEF_CMD (OUT,  3, 7,  NO,
 {

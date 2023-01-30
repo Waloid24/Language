@@ -23,8 +23,7 @@ void stack_ctor (stack_t * stk, size_t capacity, const char * name_stk,
     stk -> ptr_canary_hashsum  = (canary_t *) data;
     stk -> data = (elem_t *) (data + sizeof(canary_t));
     stk -> ptr_canary_data = (canary_t *) (data + sizeof(canary_t) + (stk->capacity)*sizeof(elem_t));
-    // *(stk -> ptr_canary_data) = BUF_CNR_SCND;
-    stk -> ptr_canary_data = (canary_t *) memmove (stk->ptr_canary_data, &BUF_CNR_SCND, sizeof(canary_t)); // has been added
+    stk -> ptr_canary_data = (canary_t *) memmove (stk->ptr_canary_data, &BUF_CNR_SCND, sizeof(canary_t));
 
     for (size_t i = 0; i < stk->capacity; i++)
     {
@@ -36,7 +35,6 @@ void stack_ctor (stack_t * stk, size_t capacity, const char * name_stk,
     
 } 
 
-//^^^^^^^^^^^^^^^^^^^^
 void stack_push (stack_t * stk, elem_t new_memb, FILE * log)
 {
     MY_ASSERT (stk == nullptr, "No stack access");
@@ -51,7 +49,6 @@ void stack_push (stack_t * stk, elem_t new_memb, FILE * log)
 
     stack_hash_sum (stk);
     stk_ok (stk, log);
-    // fclose (logfile);
 }
 
 elem_t stack_pop (stack_t * stk, FILE * log)
@@ -108,7 +105,7 @@ void stack_dump (stack_t stk, FILE * log_file)
 
     if (stk.capacity == 0)
     {
-        printf ("stk.capacity = 0, maybe you have used the function Dtor\n");
+        fprintf (stderr, "stk.capacity = 0, maybe you have used the function Dtor\n");
         abort();
     }
 
@@ -394,7 +391,7 @@ void logdump_hidden (unsigned char can_print, FILE * stack_log, stack_t * stk, c
     if (can_print)
         stack_dump (*stk, stack_log);
     else
-        printf ("Error information cannot be printed. Sorry.\n");
+        fprintf (stderr, "Error information cannot be printed. Sorry.\n");
     if (is_abort && is_err)
         abort();
 }
@@ -403,8 +400,7 @@ FILE * open_logfile (const char * name_logfile)
 {
     FILE * log = fopen (name_logfile, "a");
     MY_ASSERT (log == nullptr, "There is no access to logfile");
-
-    setbuf (log, nullptr);
+    setbuf (log, NULL);
 
     return log;
 }
@@ -414,7 +410,7 @@ void stk_ok (stack_t * stk, FILE * log)
     int sum_err = 0;
     if ((sum_err = struct_validator(stk, log)) != NOERR_STK)
     {
-        printf ("Check log file \"log.txt\", you have some problems (with your head)\n");
+        fprintf (stderr, "Check log file \"log.txt\", you have some problems (with your head)\n");
         decoder (sum_err);
     }
 }

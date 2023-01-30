@@ -23,19 +23,31 @@ int myStrcmp (const char * string1, const char * string2)
 	return (tolower(string1[i]) - tolower(string2[j]));
 }
 
-int readNum (char * src, int * dst)
+char readNum (char * src, double * doubleNumDst, int * intNumDst)
 {
     MY_ASSERT (src == nullptr, "There is no access to source string");
-    MY_ASSERT (dst == nullptr, "There is no access to destination string");
     char sym = 0;
     char * tmp = src;
 
-    while (48 <= *tmp && *tmp <= 57)
+	if (doubleNumDst == nullptr && intNumDst != nullptr)
+	{
+		while (48 <= *tmp && *tmp <= 57)
+		{
+			tmp++;
+			sym++;
+		}
+		*doubleNumDst = atoi(src);
+	}
+	else if (doubleNumDst != nullptr && intNumDst == nullptr)
     {
-        tmp++;
-        sym++;
-    }
-    *dst = atoi(src);
+		while ((48 <= *tmp && *tmp <= 57) || *tmp == '.' || *tmp == ',')
+		{
+			tmp++;
+			sym++;
+		}
+		*doubleNumDst = atoi(src);
+	}
+    
     return sym;
 }
 

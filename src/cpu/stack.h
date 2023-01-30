@@ -39,18 +39,18 @@ const int RESIZE = 2;
 const int THRESHOLD_RATIO = 4;
 
 enum STK_ERRORS {
-    NOERR_STK                =      0, //
-    PTR_STK_NULL         = 1 << 0, //
-    PTR_BUF_NULL_STK         = 1 << 1, //
+    NOERR_STK                =      0, 
+    PTR_STK_NULL         = 1 << 0, 
+    PTR_BUF_NULL_STK         = 1 << 1, 
     PTR_LOG_NULL_STK         = 1 << 2, 
-    SIZE_MORE_CAPACITY_STK   = 1 << 3, //
-    BAD_BUF_CAN_SCND_STK     = 1 << 4, //
-    BAD_STK_CAN_SCND     = 1 << 5, //
-    BAD_BUF_HASH_STK         = 1 << 6, //
-    BAD_STK_HASH         = 1 << 7, //
-    BAD_PTR_BUF_HASH_STK     = 1 << 8, //
-    BAD_PTR_BUF_CANARY_STK   = 1 << 9, //
-    BAD_POISON_STK           = 1 << 10 //
+    SIZE_MORE_CAPACITY_STK   = 1 << 3, 
+    BAD_BUF_CAN_SCND_STK     = 1 << 4, 
+    BAD_STK_CAN_SCND     = 1 << 5, 
+    BAD_BUF_HASH_STK         = 1 << 6,
+    BAD_STK_HASH         = 1 << 7, 
+    BAD_PTR_BUF_HASH_STK     = 1 << 8, 
+    BAD_PTR_BUF_CANARY_STK   = 1 << 9, 
+    BAD_POISON_STK           = 1 << 10 
 };
 
 enum is_error {
@@ -86,7 +86,7 @@ enum is_abort {
 #if (!defined(NDEBUG_STK) && !defined(DEBUG_STK))
         #define LOGDUMP(canPrint, logFile, ptr_stk, text, is_err)\
         {\
-            printf ("Please select one of the two modes (NDEBUG_STK or DEBUG_STK) and restart the program.\n"); \
+            fprintf ("stderr, Please select one of the two modes (NDEBUG_STK or DEBUG_STK) and restart the program.\n"); \
             abort();\
         }
 #endif

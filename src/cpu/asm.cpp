@@ -316,10 +316,10 @@ static void no_ram (int ** code, char * strCode, int countLetters, int numCmd) /
 
             skipSpace(&placeOfPlus, 0);
             int num = 0;
-            int nSymbols = readNum (ptrToArg, &num);
+            int nSymbols = readNum (ptrToArg, nullptr, &num);
             if (nSymbols == 0)
             {
-                readNum (placeOfPlus, &num);
+                readNum (placeOfPlus, nullptr, &num);
             }
             **code = count_reg;
             (*code)++;
@@ -346,8 +346,8 @@ static void no_ram (int ** code, char * strCode, int countLetters, int numCmd) /
     }
     else
     {
-        int num = 0;
-        int nSymbols = readNum (ptrToArg, &num);
+        double num = 0;
+        int nSymbols = readNum (ptrToArg, &num, nullptr);
         **code = setbit (**code, NUM);
         if (numCmd == CMD_PUSH)
         {
@@ -364,7 +364,7 @@ static void no_ram (int ** code, char * strCode, int countLetters, int numCmd) /
             MY_ASSERT (1, "Incorrect push or pop");
         }
         (*code)++;
-        **code = num;
+        **code = (int) num; //?
     }
 
     free (reg);
@@ -392,7 +392,7 @@ static void ram (int ** code, char * firstBracket, int numCmd)
     }
     else 
     {
-        int nDigit = readNum (firstBracket, &num);
+        int nDigit = readNum (firstBracket, nullptr, &num);
         firstBracket = firstBracket + nDigit;
         skipSpace (&firstBracket, 0);      
         sscanf (firstBracket, "%[+]", trash);
@@ -501,7 +501,7 @@ void pushSignature (char * nameBinFile, code_t codeFile)
 
     free (savePtrName);
     free (savePtrSignature);
-    fclose (dst); //��� ����� �������� ��� ����� ����� �����?
+    fclose (dst);
 }
 
 static long int findTag (tag_t * tags, char * argument, int * startTagWithCode, size_t numTags)

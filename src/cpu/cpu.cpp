@@ -107,6 +107,7 @@ void cpu (int * code, size_t nStrs, size_t numTags, FILE * binFile)
 
     FILE * logfile = open_logfile ("stack_log.txt");
     FILE * logCallStack = open_logfile ("callStack.txt");
+    
 
     size_t STANDART_SIZE_CODE = nStrs * 3; //это не размер кода, а количество элементов
 
@@ -142,7 +143,6 @@ void cpu (int * code, size_t nStrs, size_t numTags, FILE * binFile)
             i++;
             if (cmd == CMD_PUSH)
             {
-                // printf ("code[%zu] = %d\n", i, code[i]);
                 stack_push (&stk, code[i], logfile);
             }
             else if (cmd == CMD_POP)
@@ -283,7 +283,7 @@ static int getNum (void)
 
     if (enterSymbols == 0)
     {
-        printf ("Please, enter a number\n");
+        fprintf (stderr, "Please, enter a number\n");
         return getNum ();
     }
 

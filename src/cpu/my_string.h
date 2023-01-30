@@ -5,7 +5,7 @@
 #include "MY_ASSERT.h"
 
 int myStrcmp (const char * string1, const char * string2);
-int readNum (char * src, int * dst);
+char readNum (char * src, double * doubleNumDst, int * intNumDst);
 void skipSpace (char ** strCode, int countLetters);
 
 #endif
