@@ -38,7 +38,7 @@ salve
         inceptus aurora D == 0 umbra
         salve
             x assignare aurora -b umbra partem aurora 2 mul a umbra ora
-            print aurora x umbra
+            print aurora x umbra ora
             reditum 0 ora
         vale
         cruciatus
