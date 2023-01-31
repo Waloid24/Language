@@ -1,15 +1,15 @@
-#include "MY_ASSERT.h"
+#include "../debug/MY_ASSERT.h"
 #include "lexer.h"
 #include "parser.h"
-#include "graphDumpTree.h"
+#include "../tree/graphDumpTree.h"
 #include "textTree.h"
 #include "simplify.h"
-#include "getCode.h"
+#include "../common/readCode.h"
 
 #define DEF_CMD(nameCmd, value, ...)\
     const int nameCmd = value;
 
-#include "cmd.h"
+#include "../common/cmd.h"
 
 #undef DEF_CMD
 
@@ -30,7 +30,7 @@ int main (int argc, char * argv[])
 
     free (code);
 
-    deleteTree (node);
+    deleteTree (node, false);
 
     for (size_t i = 0; i < tokenResult.nTokens; i++)
     {

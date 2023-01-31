@@ -4,8 +4,8 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <ctype.h>
-#include "MY_ASSERT.h"
-#include "getCode.h"
+#include "../debug/MY_ASSERT.h"
+#include "../common/readCode.h"
 
 typedef double elem_t;
 

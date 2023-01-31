@@ -3,8 +3,8 @@
 
 #include <math.h>
 #include <stdio.h>
-#include "MY_ASSERT.h"
-#include "tree.h"
+#include "../debug/MY_ASSERT.h"
+#include "../tree/tree.h"
 
 void simplify (node_t ** node);
 

@@ -23,8 +23,15 @@ CXXFLAGS 	= -mavx -mavx2 -g --static-pie -std=c++14 -fmax-errors=100 \
 -fsanitize=signed-integer-overflow -fsanitize=undefined \
 -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=vptr -lm -pie
 
-SRC		= frontend.cpp lexer.cpp parser.cpp tree.cpp graphDumpTree.cpp myStrcmp.cpp textTree.cpp simplify.cpp getCode.cpp
+SRC		= frontend.cpp lexer.cpp parser.cpp textTree.cpp simplify.cpp
+SRC_TREE	= tree.cpp graphDumpTree.cpp
+SRC_COMMON	= readCode.cpp
+
 OUT		= frontend.out
 
+PREF_TREE	= ../tree/
+PREF_COMMON	= ../common/
+PREF_DEBUG	= ../debug/
+
 all:
-	$(CXX) $(SRC) $(CXXFLAGS) -o $(OUT)
+	$(CXX) $(SRC) $(addprefix $(PREF_TREE),$(SRC_TREE)) $(addprefix $(PREF_COMMON),$(SRC_COMMON)) $(CXXFLAGS) -o $(OUT)

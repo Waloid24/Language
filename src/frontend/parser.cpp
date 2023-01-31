@@ -3,7 +3,7 @@
 #define DEF_CMD(nameCmd, value, ...)\
     const int nameCmd = value;
 
-#include "cmd.h"
+#include "../common/cmd.h"
 
 #undef DEF_CMD
 
@@ -80,7 +80,7 @@ node_t * getGeneral (token_t ** tokens)
 
     node_t * finalNode = copyNode(multipleInstructions[i]);
 
-    deleteTree (multipleInstructions[i]);
+    deleteTree (multipleInstructions[i], false);
     free (multipleInstructions);
 
     return finalNode;
@@ -220,7 +220,7 @@ static node_t * getTerminational (token_t ** tokens, bool isMain)
     if (isMain == true)
     {
         printf ("it's main\n");
-        deleteTree (node);
+        deleteTree (node, false);
         return createKeyNode (HLT_T, nullptr, nullptr, "HLT");
     }
     else
@@ -449,7 +449,7 @@ static node_t * getArithmetic (token_t ** tokens)
 
         node_t * finalNode = copyNode (multipleInstructions[i]);
 
-        deleteTree (multipleInstructions[i]);
+        deleteTree (multipleInstructions[i], false);
         free (multipleInstructions);
 
         return finalNode;
@@ -497,7 +497,7 @@ static node_t * getTerm (token_t ** tokens)
 
         node_t * finalNode = copyNode (multipleInstructions[i]);
 
-        deleteTree (multipleInstructions[i]);
+        deleteTree (multipleInstructions[i], false);
         free (multipleInstructions);
 
         return finalNode;

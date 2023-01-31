@@ -3,7 +3,7 @@
 #define DEF_CMD(nameCmd, value, ...)\
     const int nameCmd = value;
 
-#include "cmd.h"
+#include "../common/cmd.h"
 
 #undef DEF_CMD
 
@@ -136,7 +136,7 @@ static void setToken (char *word, token_t *tokens, size_t ip)
         }                                                       \
         else
 
-    #include "cmd.h"
+    #include "../common/cmd.h"
     
     if (word[0] >= 48 && word[0] <= 57 && isalpha(word[1]) == 0) 
     {                                                            
@@ -175,6 +175,3 @@ static void dumpLexer (token_t * tokens, size_t numTokens, FILE * logfile)
         
     }
 }
-
-
-

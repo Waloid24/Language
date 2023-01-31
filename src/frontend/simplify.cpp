@@ -163,7 +163,7 @@ void simplifyAddWithZero (node_t ** node)
             (*node)->right = nullptr;
             node_t * newNode = copyNode ((*node)->left);
             MY_ASSERT (newNode == nullptr, "The left node cannot be copied");
-            deleteTree ((*node)->left);
+            deleteTree ((*node)->left, false);
             (*node)->left = nullptr;
             deleteNode (*node);
             (*node) = newNode;
@@ -175,7 +175,7 @@ void simplifyAddWithZero (node_t ** node)
             (*node)->left = nullptr;
             node_t * newNode = copyNode ((*node)->right);
             MY_ASSERT (newNode == nullptr, "The left node cannot be copied");
-            deleteTree ((*node)->right);
+            deleteTree ((*node)->right, false);
             (*node)->right = nullptr;
             deleteNode (*node);
             (*node) = newNode;
