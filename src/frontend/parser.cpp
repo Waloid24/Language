@@ -95,7 +95,6 @@ static node_t * getDefine (token_t ** tokens)
     node_t * funcName = getFunc (tokens);
     if (funcName->key_t == MAIN_T)
     {
-        printf ("This node is main\n");
         isMain = true;
     }
 
@@ -219,13 +218,11 @@ static node_t * getTerminational (token_t ** tokens, bool isMain)
 
     if (isMain == true)
     {
-        printf ("it's main\n");
         deleteTree (node, false);
         return createKeyNode (HLT_T, nullptr, nullptr, "HLT");
     }
     else
     {
-        printf ("NO MAIN\n");
         return createKeyNode (RETURN_T, nullptr, node, "RETURN");
     }
 }
