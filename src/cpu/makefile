@@ -23,13 +23,21 @@ CXXFLAGS 	= -mavx -mavx2 -g --static-pie -std=c++14 -fmax-errors=100 \
 -fsanitize=signed-integer-overflow -fsanitize=undefined \
 -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=vptr -lm -pie
 
-SRC_ASM		= mainAsm.cpp readCode.cpp my_string.cpp asm.cpp
+SRC_ASM		= mainAsm.cpp asm.cpp
 OUT_ASM		= asm.out
 
 SRC_CPU		= mainCpu.cpp cpu.cpp stack.cpp
 OUT_CPU		= cpu.out
 
+SRC_COMMON	= readCode.cpp
+SRC_DEBUG	= debug.cpp
+SRC_STRING	= myStrcmp.cpp
+
+PREF_COMMON	= ../common/
+PREF_DEBUG	= ../debug/
+PREF_STRING	= ../string/
+
 asm:
-	$(CXX) $(SRC_ASM) $(CXXFLAGS) -o $(OUT_ASM)
+	$(CXX) $(SRC_ASM) $(addprefix $(PREF_COMMON),$(SRC_COMMON)) $(addprefix $(PREF_STRING),$(SRC_STRING)) $(CXXFLAGS) -o $(OUT_ASM)
 cpu:
 	$(CXX) $(SRC_CPU) $(CXXFLAGS) -o $(OUT_CPU)

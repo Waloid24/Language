@@ -32,6 +32,8 @@ static void no_ram (int ** code, char * strCode, int countLetters, int numCmd);
 static void getArg (int ** code, char * str_text_code, int countLetters, int numCmd, FILE * logfile);
 static void freeArrTags (tag_t * tags, freeCall_t * calls, size_t sizeArrTags);
 static int setbit (int value, int position);
+static char readNum (char * src, double * doubleNumDst, int * intNumDst);
+static void skipSpace (char ** strCode, int countLetters);
 
 void dumpCode (char ** arrStrs, int * code, size_t numElem)
 {
@@ -149,6 +151,7 @@ void createBinFile (char ** arrStrs, code_t * prog, char * nameBinFile, size_t n
     for (size_t i = 0; i < prog->nStrs; i++)
     {
         sscanf (arrStrs[i], "%s", cmd);
+        printf ("cmd = %s\n", cmd);
         if (strchr (cmd, ':') != nullptr)
         {
             int freeTag = findFreePlace (tags, (int) numTags);
@@ -385,7 +388,7 @@ static void ram (int ** code, char * firstBracket, int numCmd)
         reg[3] = '\0';
         firstBracket = firstBracket + 3;
         skipSpace (&firstBracket, 0);
-        sscanf (firstBracket, "%[+]", trash); //TODO: remove trash
+        sscanf (firstBracket, "%[+]", trash);
         firstBracket = firstBracket + 1;
         skipSpace (&firstBracket, 0);
         sscanf (firstBracket, "%d", &num);
@@ -520,4 +523,42 @@ static long int findTag (tag_t * tags, char * argument, int * startTagWithCode, 
 static int setbit (int value, int position)
 {
     return (value | (1 << position));
+}
+
+static char readNum (char * src, double * doubleNumDst, int * intNumDst)
+{
+    MY_ASSERT (src == nullptr, "There is no access to source string");
+    char sym = 0;
+    char * tmp = src;
+
+	if (doubleNumDst == nullptr && intNumDst != nullptr)
+	{
+		while (48 <= *tmp && *tmp <= 57)
+		{
+			tmp++;
+			sym++;
+		}
+		*doubleNumDst = atoi(src);
+	}
+	else if (doubleNumDst != nullptr && intNumDst == nullptr)
+    {
+		while ((48 <= *tmp && *tmp <= 57) || *tmp == '.' || *tmp == ',')
+		{
+			tmp++;
+			sym++;
+		}
+		*doubleNumDst = atoi(src);
+	}
+    
+    return sym;
+}
+
+static void skipSpace (char ** strCode, int countLetters) //TODO: remove clons
+{
+    *strCode = *strCode + countLetters;
+	int i = 0;
+    for (; **strCode == ' ' || **strCode == '\t'; i++)
+    {
+        (*strCode)++;
+    }
 }

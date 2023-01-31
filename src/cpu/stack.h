@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "MY_ASSERT.h"
+#include "../debug/MY_ASSERT.h"
 #include <string.h>
  
 typedef int elem_t;
@@ -19,7 +19,7 @@ struct info_log_t {
 typedef struct {
     hash_t          hashsum_stack;
     elem_t     *    data;
-    int             n_memb; //size_t
+    int             n_memb;
     size_t          capacity;
     const char *    name;
     size_t          min_capacity; 

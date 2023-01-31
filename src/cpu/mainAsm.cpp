@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "readCode.h"
+#include "../common/readCode.h"
 #include "cpu.h"
 #include "asm.h"
-#include "MY_ASSERT.h"
+#include "../debug/MY_ASSERT.h"
 
 const int NUM_TAGS = 20;
 

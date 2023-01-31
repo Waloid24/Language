@@ -5,9 +5,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "readCode.h"
-#include "my_string.h"
-#include "MY_ASSERT.h"
+#include "../string/myStrcmp.h"
+#include "../common/readCode.h"
+#include "../debug/MY_ASSERT.h"
 
 #define STANDART_SIZE 20
 #define LONG_LINE "-----------------------------------------------------------------------------------------------------\n"
