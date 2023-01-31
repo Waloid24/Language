@@ -1,9 +1,9 @@
 #ifndef ASMFORMAT_H
 #define ASMFORMAT_H
 
-#include "tree.h"
-#include "MY_ASSERT.h"
-#include "getCode.h"
+#include "../tree/tree.h"
+#include "../debug/MY_ASSERT.h"
+#include "../common/readCode.h"
 
 typedef struct {
     char * name;

@@ -6,9 +6,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#include "tree.h"
-#include "graphDumpTree.h"
-#include "MY_ASSERT.h"
+#include "../tree/tree.h"
+#include "../tree/graphDumpTree.h"
+#include "../debug/MY_ASSERT.h"
 
 
 char * getCode (const char ** nameFile);

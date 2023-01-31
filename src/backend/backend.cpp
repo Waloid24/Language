@@ -13,7 +13,7 @@ int main (int argc, char * argv[])
 
     graphicDumpTree (node);
 
-    deleteTree (node);
+    deleteTree (node, true);
 
     free (tmpCode);
 

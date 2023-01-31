@@ -23,8 +23,16 @@ CXXFLAGS 	= -mavx -mavx2 -g --static-pie -std=c++14 -fmax-errors=100 \
 -fsanitize=signed-integer-overflow -fsanitize=undefined \
 -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=vptr -lm -pie
 
-SRC		= backend.cpp tree.cpp debug.cpp graphDumpTree.cpp getCode.cpp generator.cpp asmFormat.cpp
+SRC		= backend.cpp generator.cpp asmFormat.cpp
+SRC_TREE	= tree.cpp graphDumpTree.cpp
+SRC_COMMON	= readCode.cpp
+SRC_DEBUG	= debug.cpp
+
+PREF_TREE	= ../tree/
+PREF_COMMON	= ../common/
+PREF_DEBUG	= ../debug/
+
 OUT		= backend.out
 
 all:
-	$(CXX) $(SRC) $(CXXFLAGS) -o $(OUT)
+	$(CXX) $(SRC) $(addprefix $(PREF_TREE),$(SRC_TREE)) $(addprefix $(PREF_DEBUG),$(SRC_DEBUG)) $(addprefix $(PREF_COMMON),$(SRC_COMMON)) $(CXXFLAGS) -o $(OUT)
