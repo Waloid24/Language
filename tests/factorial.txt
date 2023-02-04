@@ -1,0 +1,25 @@
+factorial aurora num umbra
+salve
+    inceptus aurora num == 0 umbra
+    salve
+        reditum 1 ora
+    vale
+    a assignare num mul factorial aurora num subtrahere 1 umbra ora
+    reditum a ora
+vale
+
+main aurora umbra
+salve
+    a assignare 0 ora
+    scan aurora a umbra ora
+    inceptus aurora a >= 0 umbra
+    salve
+        b assignare factorial aurora a umbra ora
+        print aurora b umbra ora
+    vale
+    cruciatus
+    salve
+        print aurora 0 umbra ora
+    vale
+    reditum 0 ora
+vale

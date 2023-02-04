@@ -1,0 +1,53 @@
+main aurora umbra
+salve
+    a assignare 0 ora
+    b assignare 0 ora
+    c assignare 0 ora
+
+    scan aurora a umbra ora
+    scan aurora b umbra ora
+    scan aurora c umbra ora
+
+    inceptus aurora a == 0 umbra
+    salve
+        inceptus aurora b == 0 umbra
+        salve
+            inceptus aurora c != 0 umbra
+            salve
+                print aurora 666 umbra ora
+                reditum 0 ora
+            vale
+            cruciatus
+            salve
+                print aurora 777 umbra ora
+                reditum 0 ora
+            vale
+        vale
+        cruciatus
+        salve
+            x assignare -c partem b ora
+            print aurora x umbra ora
+            reditum 0 ora
+        vale
+    vale
+    cruciatus
+    salve
+        D assignare b mul b subtrahere 4 mul a mul c ora
+        print aurora D umbra ora
+
+        inceptus aurora D == 0 umbra
+        salve
+            x assignare aurora -b umbra partem aurora 2 mul a umbra ora
+            print aurora x umbra ora
+            reditum 0 ora
+        vale
+        cruciatus
+        salve
+            x1 assignare aurora -b crescere sqrt aurora D umbra umbra partem aurora 2 mul a umbra ora
+            x2 assignare aurora -b subtrahere sqrt aurora D umbra umbra partem aurora 2 mul a umbra ora
+            print aurora x1 umbra ora
+            print aurora x2 umbra ora
+            reditum 0 ora
+        vale
+    vale
+vale
