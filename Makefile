@@ -31,8 +31,8 @@ export LOGASMDIR	:= $(LOGDIR)/logsAsm
 export LOGCPUDIR 	:= $(LOGDIR)/logsCpu
 export LOGTREEDIR	:= $(LOGDIR)/logsTree
 
-.PHONY: all frontend backend asm cpu clean
-all: frontend backend asm cpu
+.PHONY: compile frontend backend asm cpu clean
+compile: frontend backend asm cpu
 
 frontend: | $(OBJDIR) $(DESTDIR) $(LOGDIR) $(LOGTREEDIR)
 	@ echo ------ COMPILE frontend ------
@@ -53,6 +53,13 @@ cpu: | $(OBJDIR) $(DESTDIR) $(LOGCALLDIR) $(LOGCPUDIR)
 	@ echo ------ COMPILE cpu ------
 	@ cd $(CURDIR)/src/asm && $(MAKE) cpu
 	@ $(CXX) $(OBJDIR)/cpu.o -o $(DESTDIR)/cpu $(CXXFLAGS)
+
+.PHONY: run quadraticEquation.txt
+run:
+	./bin/frontend --- $(filter-out $@,$(MAKECMDGOALS)) --- frontResult.txt
+	./bin/backend --- frontResult.txt --- backResult.txt
+	./bin/asm --- backResult.txt --- asmResult.bin
+	./bin/cpu --- asmResult.bin
 
 clean:
 	rm -r $(DESTDIR) $(OBJDIR) $(LOGDIR)

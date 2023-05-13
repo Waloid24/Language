@@ -28,6 +28,8 @@ int main (int argc, char * argv[])
 
     node_t * node = getGeneral(&tmp);
 
+    graphicDumpTree (node);
+
     simplify (&node);
 
     graphicDumpTree (node);

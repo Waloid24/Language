@@ -511,7 +511,7 @@ static node_t * getPrimary (token_t ** tokens)
     if (((*tokens)->type == TYPE_ID) && (strcmp ((*tokens)->u1.id, "-") == 0))
     {
         (*tokens)++;
-        node_t * node_1 = createNodeWithNum (-1);
+        node_t * node_1 = createNodeWithNum (-1000);
         node_t * node_2 = getPrimary (tokens);
         node_t * headNode = createNodeWithOperation (OP_MUL, node_1, node_2, "MUL");
         return headNode;

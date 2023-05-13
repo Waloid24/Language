@@ -1,0 +1,7 @@
+main aurora umbra
+salve
+    a assignare -1 ora
+    b assignare -a ora
+    print aurora b umbra ora
+    reditum 0 ora
+vale

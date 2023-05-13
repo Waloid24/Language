@@ -83,8 +83,7 @@ void writeNodeToDotFile (const node_t * node, FILE * graphicDump)
 	}
 	else 
 	
-	#include "graphDumpKeywords.h"	
-
+	#include "graphDumpKeywords.h"
 	if (node->isNum == true)
 	{
 		dumplineTree ("\t node%p [label=\"%lf\", penwidth=3, shape=rect, color=darkgreen];\n", node, node->elem);

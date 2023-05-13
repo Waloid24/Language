@@ -19,8 +19,6 @@ int main (int argc, char * argv[])
     char * nameDstFile = nameWithPath ("./bin/", argv[4]);
     asmFormat (node, nameDstFile);
 
-    graphicDumpTree (node);
-
     deleteTree (node, true);
 
     free (tmpCode);

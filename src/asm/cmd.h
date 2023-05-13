@@ -22,17 +22,17 @@ DEF_CMD (MUL,  3, 5,  NO,
 {
     int n1 = stack_pop (&stk, logfile);
     int n2 = stack_pop (&stk, logfile);
-    stack_push (&stk, n1 * n2, logfile);
+    stack_push (&stk, (int)(((double)n1/1000 * (double)n2/1000)*1000), logfile);
 })
 DEF_CMD (DIV,  3, 6,  NO,
 {
     int n1 = stack_pop (&stk, logfile);
     int n2 = stack_pop (&stk, logfile);
-    stack_push (&stk, n2 / n1, logfile);
+    stack_push (&stk, (int)(((double)n2 / (double)n1)*1000), logfile);
 })
 DEF_CMD (OUT,  3, 7,  NO,
 {
-    fprintf (stdout, "OUT: %d\n", stack_pop (&stk, logfile));
+    fprintf (stdout, "OUT: %.3f\n", ((double)stack_pop (&stk, logfile))/1000);
 })
 DEF_CMD (IN,   2, 8,  NO,
 {
@@ -88,7 +88,7 @@ DEF_CMD (HLT,  3, 18, NO,
 DEF_CMD (SQRT, 4, 19, NO,
 {
     int tmp = stack_pop (&stk, logfile);
-    int result = (int) sqrt ((double) tmp);
+    int result = (int) (sqrt ((double)tmp/1000) * 1000);
     stack_push (&stk, result, logfile);
 })
 DEF_CMD (MEOW, 4, 20, NO,

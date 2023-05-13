@@ -181,7 +181,7 @@ void cpu (int * code, size_t nStrs, size_t numTags, FILE * binFile)
             i++;
             int nReg = code[i];
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
-            i++;    
+            i++;
             int tmp = regs[nReg] + code[i];
             stack_push (&stk, tmp, logfile);
         }
@@ -275,8 +275,8 @@ void cpu (int * code, size_t nStrs, size_t numTags, FILE * binFile)
 
 static int getNum (void)
 {
-    int degreeOfNum = 0;
-    int enterSymbols = scanf (" %d", &degreeOfNum);
+    double degreeOfNum = 0;
+    int enterSymbols = scanf (" %lf", &degreeOfNum);
     while (getchar() != '\n');
 
     if (enterSymbols == 0)
@@ -285,7 +285,7 @@ static int getNum (void)
         return getNum ();
     }
 
-    return degreeOfNum;
+    return (int)(degreeOfNum*1000);
 }
 
 static int * createArrRegs (size_t numRegs)
