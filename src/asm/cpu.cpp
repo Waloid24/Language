@@ -157,7 +157,7 @@ void cpu (int * code, size_t nStrs, size_t numTags, FILE * binFile)
                 (checkBit(code[i], RAM) == 0)) //push/pop rax
         {     
             i++;
-            int nReg = code[i];    
+            int nReg = code[i];
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
 
             if (cmd == CMD_PUSH)

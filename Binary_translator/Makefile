@@ -26,43 +26,23 @@ export CXXFLAGS 	:= -mavx -mavx2 -g --static-pie -std=c++14 -fmax-errors=100 \
 export DESTDIR		:= $(CURDIR)/bin
 export OBJDIR		:= $(CURDIR)/obj
 export LOGDIR		:= $(CURDIR)/logs
-export LOGCALLDIR	:= $(LOGDIR)/logsStack
-export LOGASMDIR	:= $(LOGDIR)/logsAsm
-export LOGCPUDIR 	:= $(LOGDIR)/logsCpu
-export LOGTREEDIR	:= $(LOGDIR)/logsTree
+export GRAPHDIR		:= $(CURDIR)/graph
 
-.PHONY: compile frontend backend asm cpu clean
-compile: frontend backend asm cpu
+.PHONY: compile src logs
+compile: src
 
-frontend: | $(OBJDIR) $(DESTDIR) $(LOGDIR) $(LOGTREEDIR)
-	@ echo ------ COMPILE frontend ------
-	@ cd $(CURDIR)/src/frontend && $(MAKE)
-	@ $(CXX) $(OBJDIR)/frontend.o -o $(DESTDIR)/frontend $(CXXFLAGS)
-
-backend: | $(OBJDIR) $(DESTDIR) $(LOGTREEDIR)
-	@ echo ------ COMPILE backend ------
-	@ cd $(CURDIR)/src/backend && $(MAKE)
-	@ $(CXX) $(OBJDIR)/backend.o -o $(DESTDIR)/backend $(CXXFLAGS)
-
-asm: | $(OBJDIR) $(DESTDIR) $(LOGASMDIR)
-	@ echo ------ COMPILE asm ------
-	@ cd $(CURDIR)/src/asm && $(MAKE) asm
-	@ $(CXX) $(OBJDIR)/asm.o -o $(DESTDIR)/asm $(CXXFLAGS)
-
-cpu: | $(OBJDIR) $(DESTDIR) $(LOGCALLDIR) $(LOGCPUDIR)
-	@ echo ------ COMPILE cpu ------
-	@ cd $(CURDIR)/src/asm && $(MAKE) cpu
-	@ $(CXX) $(OBJDIR)/cpu.o -o $(DESTDIR)/cpu $(CXXFLAGS)
+src: | $(OBJDIR) $(DESTDIR) $(LOGDIR) $(GRAPHDIR)
+	@ echo ------ COMPILE src ------
+	@ cd $(CURDIR)/src && $(MAKE)
+	@ cd $(CURDIR)/src/logs && $(MAKE)
+	@ $(CXX) $(OBJDIR)/src.o $(OBJDIR)/logs.o -o $(DESTDIR)/main $(CXXFLAGS)
 
 .PHONY: run
 run:
-	./bin/frontend --- $(filter-out $@,$(MAKECMDGOALS)) --- frontResult.txt
-	./bin/backend --- frontResult.txt --- backResult.txt
-	./bin/asm --- backResult.txt --- asmResult.bin
-	./bin/cpu --- asmResult.bin
+	./bin/main asmResult.bin
 
 clean:
-	rm -r $(DESTDIR) $(OBJDIR) $(LOGDIR)
+	rm -r $(DESTDIR) $(OBJDIR) $(LOGDIR) $(GRAPHDIR)
 
 $(DESTDIR):
 	mkdir $(DESTDIR)
@@ -70,11 +50,6 @@ $(OBJDIR):
 	mkdir $(OBJDIR)
 $(LOGDIR):
 	mkdir $(LOGDIR)
-$(LOGCALLDIR):
-	mkdir $(LOGCALLDIR)
-$(LOGASMDIR):
-	mkdir $(LOGASMDIR)
-$(LOGCPUDIR):
-	mkdir $(LOGCPUDIR)
-$(LOGTREEDIR):
-	mkdir $(LOGTREEDIR)
+$(GRAPHDIR):
+	mkdir $(GRAPHDIR)
+
