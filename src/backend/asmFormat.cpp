@@ -203,10 +203,7 @@ static void processFuncBody (node_t * node, FILE * asmFile, var_t ** tableGlobVa
             printAsm ("je afterIf%zu:;\n", NUM_IF);
         }
         size_t tmpIf = NUM_IF;
-<<<<<<< HEAD
-=======
         NUM_IF++;
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
         processFuncBody (node->right->left, asmFile, tableGlobVars, tableLocalVars, numVars);
 
         if (node->right->right != nullptr)

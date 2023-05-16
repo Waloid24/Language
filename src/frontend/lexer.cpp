@@ -1,9 +1,6 @@
 #include "lexer.h"
-<<<<<<< HEAD
-=======
 #include "../logs/logs.h"
 #include <iostream>
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 
 #define DEF_CMD(nameCmd, value, ...)\
     const int nameCmd = value;
@@ -15,22 +12,11 @@
 static void setToken(char *word, token_t *tokens, size_t ip);
 static char * getWord(char * str);
 static char * skipSpace(char *str);
-<<<<<<< HEAD
-static void dumpLexer (token_t * tokens, size_t numTokens, FILE * logfile);
-
-retLex_t getTokens (char * code, char * nameLogFile)
-{
-    MY_ASSERT (code == nullptr, "Wrong pointer to the array with your code");
-
-    FILE * logfile = openFile (nameLogFile, "w");
-
-=======
 
 retLex_t getTokens (char * code)
 {
     MY_ASSERT (code == nullptr, "Wrong pointer to the array with your code");
 
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
     retLex_t result = {};
 
     token_t * tokens = (token_t *) allocateMemory (STANDART_SIZE_TOKEN_ARR, sizeof(token_t));
@@ -78,11 +64,7 @@ retLex_t getTokens (char * code)
     result.tokens  = tokens;
     result.nTokens = numTokens;
 
-<<<<<<< HEAD
-    dumpLexer (tokens, numTokens, logfile);
-=======
     dumpLexer (tokens, numTokens);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 
     return result;
 }
@@ -154,19 +136,11 @@ static void setToken (char *word, token_t *tokens, size_t ip)
         else
 
     #include "../common/cmd.h"
-<<<<<<< HEAD
-    
-    if (word[0] >= 48 && word[0] <= 57 && isalpha(word[1]) == 0) 
-    {                                                            
-        tokens[ip].type = TYPE_NUM;
-        tokens[ip].u1.value = atoi(word);
-=======
 
     if (word[0] >= 48 && word[0] <= 57 && isalpha(word[1]) == 0) 
     {                                                            
         tokens[ip].type = TYPE_NUM;
         tokens[ip].u1.value = (int) (std::stof(word) * 1000);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
     }
     else
     {
@@ -176,30 +150,3 @@ static void setToken (char *word, token_t *tokens, size_t ip)
 
     #undef DEF_CMD
 }
-<<<<<<< HEAD
-
-static void dumpLexer (token_t * tokens, size_t numTokens, FILE * logfile)
-{
-    for (size_t i = 0; i < numTokens; i++)
-    {
-        fprintf (logfile, "tokens[%zu]\n", i);
-        fprintf (logfile, "----> type = %d\n", tokens[i].type);
-        if (tokens[i].type == TYPE_ID)
-        {
-            fprintf (logfile, "----> id   = %s\n", tokens[i].u1.id);
-        }
-        else if (tokens[i].type == TYPE_SIN || tokens[i].type == TYPE_COS ||
-                tokens[i].type == TYPE_LN ||  tokens[i].type == TYPE_PRINT ||
-                tokens[i].type == TYPE_SCAN || tokens[i].type == TYPE_SQRT) 
-        {
-            fprintf (logfile, "----> id   = %s\n", tokens[i].u1.id);
-        }
-        else if (tokens[i].type == TYPE_NUM)
-        {
-            fprintf (logfile, "----> val  = %d\n", tokens[i].u1.value);
-        }
-        
-    }
-}
-=======
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6

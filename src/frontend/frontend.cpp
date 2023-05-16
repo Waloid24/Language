@@ -13,15 +13,6 @@
 
 #undef DEF_CMD
 
-<<<<<<< HEAD
-int main (int argc, char * argv[])
-{
-    MY_ASSERT (argc != 4, "Too few argument in a command line");
-
-    char * code = getCode (argv[1]);
-
-    retLex_t tokenResult = getTokens (code, argv[3]);
-=======
 static char * nameWithPath (const char * path, char * nameFileWithoutDir);
 
 int main (int argc, char * argv[])
@@ -33,16 +24,10 @@ int main (int argc, char * argv[])
     char * code = getCode (nameSrcFile);
 
     retLex_t tokenResult = getTokens (code);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
     token_t * tmp = tokenResult.tokens;
 
     node_t * node = getGeneral(&tmp);
 
-<<<<<<< HEAD
-    simplify (&node);
-
-    textTree (node, argv[2]);
-=======
     graphicDumpTree (node);
 
     simplify (&node);
@@ -51,7 +36,6 @@ int main (int argc, char * argv[])
 
     char * nameDstFile = nameWithPath ("./bin/", argv[4]);
     textTree (node, nameDstFile);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 
     free (code);
 
@@ -68,9 +52,6 @@ int main (int argc, char * argv[])
         }
     }
     free (tokenResult.tokens);
-<<<<<<< HEAD
-    return 0;
-=======
     free (nameSrcFile);
     free (nameDstFile);
     return 0;
@@ -91,5 +72,4 @@ static char * nameWithPath (const char * path, char * nameFileWithoutDir)
     fullName[lengthName + lengthPath] = '\0';
 
     return fullName;
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 }

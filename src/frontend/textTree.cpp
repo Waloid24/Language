@@ -12,11 +12,8 @@ void textTree (node_t * node, char * name)
 {
     MY_ASSERT (node == nullptr, "There is no access to the tree");
 
-<<<<<<< HEAD
-=======
     // char * path = "./bin/";
     // char * fullname = strcat (path, name);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
     FILE * nameFile = openFile (name, "w");
 
     dumpTree (node, nameFile);

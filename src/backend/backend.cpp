@@ -1,10 +1,5 @@
 #include "generator.h"
 
-<<<<<<< HEAD
-int main (int argc, char * argv[])
-{
-    char * code = getCode (argv[1]);
-=======
 static char * nameWithPath (const char * path, char * nameFileWithoutDir);
 
 int main (int argc, char * argv[])
@@ -14,40 +9,25 @@ int main (int argc, char * argv[])
 
     char * nameSrcFile = nameWithPath ("./bin/", argv[2]);
     char * code = getCode (nameSrcFile);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
     char * tmpCode = code;
 
     node_t * node = createTree (&code);
 
-<<<<<<< HEAD
-    graphicDumpTree (node);
-
-    asmFormat (node, argv[2]);
-
-    graphicDumpTree (node);
-=======
     // int isRem = remove (nameSrcFile);
     // MY_ASSERT (isRem != 0, "Error deleting a file");
 
     char * nameDstFile = nameWithPath ("./bin/", argv[4]);
     asmFormat (node, nameDstFile);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 
     deleteTree (node, true);
 
     free (tmpCode);
-<<<<<<< HEAD
-=======
     free (nameSrcFile);
     free (nameDstFile);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 
     return 0;
 }
 
-<<<<<<< HEAD
-
-=======
 static char * nameWithPath (const char * path, char * nameFileWithoutDir)
 {
     MY_ASSERT (path == nullptr, "No access to the file path");
@@ -64,4 +44,3 @@ static char * nameWithPath (const char * path, char * nameFileWithoutDir)
 
     return fullName;
 }
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6

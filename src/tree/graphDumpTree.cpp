@@ -17,13 +17,8 @@ void graphicDumpTree (const node_t * node)
 {
 	MY_ASSERT (node == nullptr, "There is no access to this node");
 
-<<<<<<< HEAD
-    const char * dotFileTree = "treeGraphviz.dot";
-	const char * htmlFileTree = "treeGraphviz.html";
-=======
     const char * dotFileTree 	= "./logs/logsTree/treeGraphviz.dot";
 	const char * htmlFileTree 	= "./logs/logsTree/treeGraphviz.html";
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 
 	dotFileHeaderForTree	(node, dotFileTree);
 	createDotFileTree		(dotFileTree, NUMBER_GRAPHICAL_TREE_DUMPS);
@@ -88,12 +83,7 @@ void writeNodeToDotFile (const node_t * node, FILE * graphicDump)
 	}
 	else 
 	
-<<<<<<< HEAD
-	#include "graphDumpKeywords.h"	
-
-=======
 	#include "graphDumpKeywords.h"
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 	if (node->isNum == true)
 	{
 		dumplineTree ("\t node%p [label=\"%lf\", penwidth=3, shape=rect, color=darkgreen];\n", node, node->elem);
@@ -135,11 +125,7 @@ void createDotFileTree (const char * nameDotFile, unsigned int timesCreatePictur
 	MY_ASSERT (nameDotFile == nullptr, "There is no access to name file for graphic dump");
 
 	char buf[100] = {};
-<<<<<<< HEAD
-    sprintf(buf, "dot -T png -o graph%u.png %s", timesCreatePicture, nameDotFile);
-=======
     sprintf(buf, "dot -T png -o ./logs/logsTree/graph%u.png %s", timesCreatePicture, nameDotFile);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
     system(buf);
 }
 

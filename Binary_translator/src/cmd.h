@@ -8,7 +8,7 @@ DEF_CMD (POP,  2, YES,
 })
 DEF_CMD (ADD,  3,  NO,
 {
-    commandsArray[i] = {
+    commandsArray[numCmds] = {
         .name           = "add",
         .cmd            = CMD_ADD,
         .nativeSize     = 1,
@@ -17,7 +17,7 @@ DEF_CMD (ADD,  3,  NO,
 })
 DEF_CMD (SUB,  4,  NO,
 {
-    commandsArray[i] = {
+    commandsArray[numCmds] = {
         .name           = "sub",
         .cmd            = CMD_SUB,
         .nativeSize     = 1,
@@ -26,7 +26,7 @@ DEF_CMD (SUB,  4,  NO,
 })
 DEF_CMD (MUL,  5,  NO,
 {
-    commandsArray[i] = {
+    commandsArray[numCmds] = {
         .name           = "mul",
         .cmd            = CMD_MUL,
         .nativeSize     = 1,
@@ -35,7 +35,7 @@ DEF_CMD (MUL,  5,  NO,
 })
 DEF_CMD (DIV,  6,  NO,
 {
-    commandsArray[i] = {
+    commandsArray[numCmds] = {
         .name           = "div",
         .cmd            = CMD_DIV,
         .nativeSize     = 1,
@@ -44,7 +44,7 @@ DEF_CMD (DIV,  6,  NO,
 })
 DEF_CMD (OUT,  7,  NO,
 {
-    commandsArray[i] = {
+    commandsArray[numCmds] = {
         .name           = "out",
         .cmd            = CMD_OUT,
         .nativeSize     = 1,
@@ -53,7 +53,7 @@ DEF_CMD (OUT,  7,  NO,
 })
 DEF_CMD (IN,   8,  NO,
 {
-    commandsArray[i] = {
+    commandsArray[numCmds] = {
         .name           = "in",
         .cmd            = CMD_IN,
         .nativeSize     = 1,
@@ -63,7 +63,7 @@ DEF_CMD (IN,   8,  NO,
 DEF_CMD (JMP,  9,  YES,
 {
     i++;
-    commandsArray[i-1] = {
+    commandsArray[numCmds] = {
         .name           = "JMP",
         .cmd            = CMD_JMP,
         .nativeSize     = 2,
@@ -75,7 +75,7 @@ DEF_CMD (JMP,  9,  YES,
 DEF_CMD (CALL, 10, YES,
 {
     i++;
-    commandsArray[i-1] = {
+    commandsArray[numCmds] = {
         .name           = "call",
         .cmd            = CMD_CALL,
         .nativeSize     = 2,
@@ -86,7 +86,7 @@ DEF_CMD (CALL, 10, YES,
 })
 DEF_CMD (RET,  11, NO,
 {
-    commandsArray[i] = {
+    commandsArray[numCmds] = {
         .name           = "ret",
         .cmd            = CMD_RET,
         .nativeSize     = 1,
@@ -125,7 +125,7 @@ DEF_CMD (JNE,  17, YES,
 })
 DEF_CMD (HLT,  18, NO,
 {
-    commandsArray[i] = {
+    commandsArray[numCmds] = {
         .name           = "hlt",
         .cmd            = CMD_HLT,
         .nativeSize     = 1,
@@ -134,7 +134,7 @@ DEF_CMD (HLT,  18, NO,
 })
 DEF_CMD (SQRT, 19, NO,
 {
-    commandsArray[i] = {
+    commandsArray[numCmds] = {
         .name           = "sqrt",
         .cmd            = CMD_SQRT,
         .nativeSize     = 1,
@@ -143,7 +143,7 @@ DEF_CMD (SQRT, 19, NO,
 })
 DEF_CMD (MEOW, 20, NO,
 {
-    commandsArray[i] = {
+    commandsArray[numCmds] = {
         .name           = "meow",
         .cmd            = CMD_MEOW,
         .nativeSize     = 1,

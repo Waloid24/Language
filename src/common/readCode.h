@@ -2,10 +2,7 @@
 #define READ_CODE_H
 
 #include <stdio.h>
-<<<<<<< HEAD
-=======
 #include <string.h>
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 #include <sys/stat.h>
 #include "../debug/MY_ASSERT.h"
 

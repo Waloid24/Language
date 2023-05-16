@@ -62,15 +62,15 @@ void graphvizDumpIR (cmd_t * commandsArray, size_t numElem)
         {
             if (isJump(commandsArray[i].cmd)) 
             {
-                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<name>name: %s|<size> size(native): %d\", style = \"filled\", fillcolor = \"cyan\" \n];\n", i, i, name, commandsArray[i].nativeSize);
+                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"cyan\" \n];\n", i, i, commandsArray[i].nativeIP, name, commandsArray[i].nativeSize, commandsArray[i].argument);
             }
             else if (isPushPop(commandsArray[i].cmd)) 
             {
-                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<name>name: %s|<size> size(native): %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, commandsArray[i].name, commandsArray[i].nativeSize);
+                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, commandsArray[i].nativeIP, commandsArray[i].name, commandsArray[i].nativeSize, commandsArray[i].argument);
             }
             else 
             {
-                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<name>name: %s|<size> size(native): %d \", style = \"filled\", fillcolor = \"gray\" \n];\n", i, i, commandsArray[i].name, commandsArray[i].nativeSize);
+                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"gray\" \n];\n", i, i, commandsArray[i].nativeIP, commandsArray[i].name, commandsArray[i].nativeSize, commandsArray[i].argument);
             }
             if (i == 0)
             {

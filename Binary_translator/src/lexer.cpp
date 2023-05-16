@@ -20,7 +20,7 @@ typedef enum {
 #undef DEF_CMD
 
 #define JUMP_FORM(command)                          \
-    commandsArray[i-1] = {                          \
+    commandsArray[numCmds] = {                      \
         .name           = #command,                 \
         .cmd            = CMD_##command,            \
         .nativeSize     = 2,                        \
@@ -30,7 +30,7 @@ typedef enum {
     };
 
 #define BOOL_EXPR(command)                          \
-    commandsArray[i] = {                            \
+    commandsArray[numCmds] = {                      \
         .name           = #command,                 \
         .cmd            = CMD_##command,            \
         .nativeSize     = 2,                        \
@@ -75,7 +75,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
             i++;
             if (cmd == CMD_PUSH)
             {
-                commandsArray[i-1] = {
+                commandsArray[numCmds] = {
                     .name           = "push_num",
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
@@ -87,7 +87,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
             else if (cmd == CMD_POP)
             {
                 i++;
-                commandsArray[i-1] = {
+                commandsArray[numCmds] = {
                     .name           = "pop_empty",
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
@@ -111,7 +111,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
 
             if (cmd == CMD_PUSH)
             {
-                commandsArray[i-1] = {
+                commandsArray[numCmds] = {
                     .name           = "push_reg",
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
@@ -122,7 +122,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
             }
             else if (cmd == CMD_POP)
             {
-                commandsArray[i-1] = {
+                commandsArray[numCmds] = {
                     .name           = "pop_reg",
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
@@ -147,7 +147,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
             i++;
             int tmp = regs[nReg] + byteCode[i];
-            commandsArray[i-2] = {
+            commandsArray[numCmds] = {
                 .name           = "push_num_reg",
                 .cmd            = CMD_PUSH,
                 .nativeSize     = 3, 
@@ -165,7 +165,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
             MY_ASSERT ((size_t) ramIndex > MAX_RAM-1, "You are out of RAM");
             if (cmd == CMD_PUSH)
             {
-                commandsArray[i-1] = {
+                commandsArray[numCmds] = {
                     .name           = "push_num",
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
@@ -176,7 +176,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
             }
             else if (cmd == CMD_POP)
             {
-                commandsArray[i-1] = {
+                commandsArray[numCmds] = {
                     .name           = "pop_num",
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
@@ -202,7 +202,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
 
             if (cmd == CMD_PUSH)
             {
-                commandsArray[i-1] = {
+                commandsArray[numCmds] = {
                     .name           = "push_reg",
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
@@ -213,7 +213,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
             }
             else if (cmd == CMD_POP)
             {
-                commandsArray[i-1] = {
+                commandsArray[numCmds]  = {
                     .name           = "pop_reg",
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
@@ -242,7 +242,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
 
             if (cmd == CMD_PUSH)
             {
-                commandsArray[i-2] = {
+                commandsArray[numCmds] = {
                     .name           = "push_mem_num_reg",
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 3,
@@ -253,7 +253,7 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
             }
             else if (cmd == CMD_POP)
             {
-                commandsArray[i-2] = {
+                commandsArray[numCmds]  = {
                     .name           = "pop_mem_num_reg",
                     .cmd            = CMD_POP,
                     .nativeSize     = 3,
