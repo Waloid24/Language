@@ -119,7 +119,11 @@ FILE * openFile(const char * nameFile, const char * format)
     return file;
 }
 
+<<<<<<< HEAD
 void * allocateMemory (size_t numElem, size_t sizeElem) //
+=======
+void * allocateMemory (size_t numElem, size_t sizeElem)
+>>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 {
     void * ptr = calloc (numElem, sizeElem);
     MY_ASSERT (ptr == nullptr, "Unable to allocate new memory");

@@ -13,6 +13,7 @@
 
 #undef DEF_CMD
 
+<<<<<<< HEAD
 int main (int argc, char * argv[])
 {
     MY_ASSERT (argc != 4, "Too few argument in a command line");
@@ -20,13 +21,37 @@ int main (int argc, char * argv[])
     char * code = getCode (argv[1]);
 
     retLex_t tokenResult = getTokens (code, argv[3]);
+=======
+static char * nameWithPath (const char * path, char * nameFileWithoutDir);
+
+int main (int argc, char * argv[])
+{
+    MY_ASSERT (argc < 5, "Too few argument in a command line, you need 5");
+    MY_ASSERT (argc > 5, "Too many arguments in a command line, you need 5");
+
+    char * nameSrcFile = nameWithPath ("./tests/", argv[2]);
+    char * code = getCode (nameSrcFile);
+
+    retLex_t tokenResult = getTokens (code);
+>>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
     token_t * tmp = tokenResult.tokens;
 
     node_t * node = getGeneral(&tmp);
 
+<<<<<<< HEAD
     simplify (&node);
 
     textTree (node, argv[2]);
+=======
+    graphicDumpTree (node);
+
+    simplify (&node);
+
+    graphicDumpTree (node);
+
+    char * nameDstFile = nameWithPath ("./bin/", argv[4]);
+    textTree (node, nameDstFile);
+>>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 
     free (code);
 
@@ -43,5 +68,28 @@ int main (int argc, char * argv[])
         }
     }
     free (tokenResult.tokens);
+<<<<<<< HEAD
     return 0;
+=======
+    free (nameSrcFile);
+    free (nameDstFile);
+    return 0;
+}
+
+static char * nameWithPath (const char * path, char * nameFileWithoutDir)
+{
+    MY_ASSERT (path == nullptr, "No access to the file path");
+    MY_ASSERT (path == nullptr, "No access to the file name");
+    
+    size_t lengthName = strlen (nameFileWithoutDir);
+    size_t lengthPath = strlen (path);
+    char * fullName = (char *) allocateMemory (lengthName + lengthPath + 1, sizeof(char));
+
+    memcpy (fullName, path, sizeof(char)*lengthPath);
+    memcpy (fullName + lengthPath, nameFileWithoutDir, sizeof(char)*lengthName);
+
+    fullName[lengthName + lengthPath] = '\0';
+
+    return fullName;
+>>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 }

@@ -27,6 +27,10 @@ typedef struct retLex retLex_t;
 
 const size_t STANDART_SIZE_TOKEN_ARR = 10;
 
+<<<<<<< HEAD
 retLex_t getTokens (char * code, char * nameLogFile);
+=======
+retLex_t getTokens (char * code);
+>>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
 
 #endif

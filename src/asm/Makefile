@@ -23,62 +23,37 @@ CXXFLAGS 	?= -mavx -mavx2 -g --static-pie -std=c++14 -fmax-errors=100 \
 -fsanitize=signed-integer-overflow -fsanitize=undefined \
 -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=vptr -lm -pie
 
-SRC		:= frontend.cpp lexer.cpp simplify.cpp textTree.cpp parser.cpp
-SRC_TREE	:= tree.cpp graphDumpTree.cpp
+SRC_ASM		:= mainAsm.cpp asm.cpp
+OUT_ASM		:= asm.o
+
+SRC_CPU		:= mainCpu.cpp cpu.cpp stack.cpp
+OUT_CPU		:= cpu.o
+
 SRC_COMMON	:= readCode.cpp
-<<<<<<< HEAD
-OUT		:= frontend
-=======
-SRC_LOGS	:= logs.cpp
-OUT		:= frontend.o
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
+SRC_DEBUG	:= debug.cpp
+SRC_STRING	:= myStrcmp.cpp
 
-#Is needed in order to access the fыiles
-PREF_TREE	:= ../tree/
 PREF_COMMON	:= ../common/
-<<<<<<< HEAD
 PREF_DEBUG	:= ../debug/
-VPATH 		:= $(PREF_TREE) $(PREF_COMMON) $(PREF_DEBUG)
-#end this block
+PREF_STRING	:= ../string/
+VPATH		:= $(PREF_COMMON) $(PREF_DEBUG) $(PREF_STRING)
 
-OBJDIR 		:= ../obj
-DESTDIR		:= ../bin
-OBJ 		:= $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o) $(SRC_TREE:.cpp=.o) $(SRC_COMMON:.cpp=.o))
+OBJ_ASM		:= $(addprefix $(OBJDIR)/, $(SRC_ASM:.cpp=.tmp.o) $(SRC_COMMON:.cpp=.tmp.o) $(SRC_DEBUG:.cpp=.tmp.o) $(SRC_STRING:.cpp=.tmp.o))
 
-OUT		:= $(DESTDIR)/$(OUT)
+OBJ_CPU		:= $(addprefix $(OBJDIR)/, $(SRC_CPU:.cpp=.tmp.o) $(SRC_COMMON:.cpp=.tmp.o) $(SRC_DEBUG:.cpp=.tmp.o) $(SRC_STRING:.cpp=.tmp.o))
 
-.PHONY:	all clean
-all: $(OUT)
+OUT_ASM		:= $(OBJDIR)/$(OUT_ASM)
+OUT_CPU		:= $(OBJDIR)/$(OUT_CPU)
 
-$(OBJDIR)/%.o: %.cpp | $(OBJDIR) $(DESTDIR)
-	$(CXX) $(CXXFLAGS) -c $^ -o $@
+.PHONY: asm cpu
+asm: $(OUT_ASM)
+cpu: $(OUT_CPU)
 
-$(OUT): $(OBJ) | $(OBJDIR) $(DESTDIR)
-	ld -r $(OBJ) -o $(OUT)
+$(OUT_ASM): $(OBJ_ASM)
+	ld -r $(OBJ_ASM) -o $(OUT_ASM)
 
-clean:
-	@ echo ------ CLEAN $(OBJDIR) ------
-	rm -f $(OUT) $(OBJ)
+$(OUT_CPU): $(OBJ_CPU) | $(LOGCALLDIR)
+	ld -r $(OBJ_CPU) -o $(OUT_CPU)
 
-$(DESTDIR):
-	mkdir $(DESTDIR)
-$(OBJDIR):
-	mkdir $(OBJDIR)
-=======
-PREF_LOGS	:= ../logs/
-VPATH 		:= $(PREF_TREE) $(PREF_COMMON) $(PREF_LOGS)
-#end this block
-
-OBJ 		:= $(addprefix $(OBJDIR)/, $(SRC:.cpp=.tmp.o) $(SRC_TREE:.cpp=.tmp.o) $(SRC_COMMON:.cpp=.tmp.o) $(SRC_LOGS:.cpp=.tmp.o))
-
-OUT		:= $(OBJDIR)/$(OUT)
-
-.PHONY:	all
-all: $(OUT)
-
-$(OBJDIR)/%.tmp.o: %.cpp | $(OBJDIR) $(LOGDIR)
+$(OBJDIR)/%.tmp.o: %.cpp | $(OBJDIR)
 	@ $(CXX) -c $^ -o $@ $(CXXFLAGS)
-
-$(OUT): $(OBJ)
-	ld -r $(OBJ) -o $(OUT)
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6

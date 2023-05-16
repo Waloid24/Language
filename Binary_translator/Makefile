@@ -1,5 +1,5 @@
-CXX 		?= g++
-CXXFLAGS 	?= -mavx -mavx2 -g --static-pie -std=c++14 -fmax-errors=100 \
+export CXX 		:= g++
+export CXXFLAGS 	:= -mavx -mavx2 -g --static-pie -std=c++14 -fmax-errors=100 \
 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations -Wc++0x-compat \
 -Wc++11-compat -Wc++14-compat -Wcast-align -Wcast-qual -Wchar-subscripts \
 -Wconditionally-supported -Wconversion -Wctor-dtor-privacy -Wempty-body \
@@ -23,62 +23,33 @@ CXXFLAGS 	?= -mavx -mavx2 -g --static-pie -std=c++14 -fmax-errors=100 \
 -fsanitize=signed-integer-overflow -fsanitize=undefined \
 -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=vptr -lm -pie
 
-SRC		:= frontend.cpp lexer.cpp simplify.cpp textTree.cpp parser.cpp
-SRC_TREE	:= tree.cpp graphDumpTree.cpp
-SRC_COMMON	:= readCode.cpp
-<<<<<<< HEAD
-OUT		:= frontend
-=======
-SRC_LOGS	:= logs.cpp
-OUT		:= frontend.o
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
+export DESTDIR		:= $(CURDIR)/bin
+export OBJDIR		:= $(CURDIR)/obj
+export LOGDIR		:= $(CURDIR)/logs
+export GRAPHDIR		:= $(CURDIR)/graph
 
-#Is needed in order to access the fыiles
-PREF_TREE	:= ../tree/
-PREF_COMMON	:= ../common/
-<<<<<<< HEAD
-PREF_DEBUG	:= ../debug/
-VPATH 		:= $(PREF_TREE) $(PREF_COMMON) $(PREF_DEBUG)
-#end this block
+.PHONY: compile src logs
+compile: src
 
-OBJDIR 		:= ../obj
-DESTDIR		:= ../bin
-OBJ 		:= $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o) $(SRC_TREE:.cpp=.o) $(SRC_COMMON:.cpp=.o))
+src: | $(OBJDIR) $(DESTDIR) $(LOGDIR) $(GRAPHDIR)
+	@ echo ------ COMPILE src ------
+	@ cd $(CURDIR)/src && $(MAKE)
+	@ cd $(CURDIR)/src/logs && $(MAKE)
+	@ $(CXX) $(OBJDIR)/src.o $(OBJDIR)/logs.o -o $(DESTDIR)/main $(CXXFLAGS)
 
-OUT		:= $(DESTDIR)/$(OUT)
-
-.PHONY:	all clean
-all: $(OUT)
-
-$(OBJDIR)/%.o: %.cpp | $(OBJDIR) $(DESTDIR)
-	$(CXX) $(CXXFLAGS) -c $^ -o $@
-
-$(OUT): $(OBJ) | $(OBJDIR) $(DESTDIR)
-	ld -r $(OBJ) -o $(OUT)
+.PHONY: run
+run:
+	./bin/main asmResult.bin
 
 clean:
-	@ echo ------ CLEAN $(OBJDIR) ------
-	rm -f $(OUT) $(OBJ)
+	rm -r $(DESTDIR) $(OBJDIR) $(LOGDIR) $(GRAPHDIR)
 
 $(DESTDIR):
 	mkdir $(DESTDIR)
 $(OBJDIR):
 	mkdir $(OBJDIR)
-=======
-PREF_LOGS	:= ../logs/
-VPATH 		:= $(PREF_TREE) $(PREF_COMMON) $(PREF_LOGS)
-#end this block
+$(LOGDIR):
+	mkdir $(LOGDIR)
+$(GRAPHDIR):
+	mkdir $(GRAPHDIR)
 
-OBJ 		:= $(addprefix $(OBJDIR)/, $(SRC:.cpp=.tmp.o) $(SRC_TREE:.cpp=.tmp.o) $(SRC_COMMON:.cpp=.tmp.o) $(SRC_LOGS:.cpp=.tmp.o))
-
-OUT		:= $(OBJDIR)/$(OUT)
-
-.PHONY:	all
-all: $(OUT)
-
-$(OBJDIR)/%.tmp.o: %.cpp | $(OBJDIR) $(LOGDIR)
-	@ $(CXX) -c $^ -o $@ $(CXXFLAGS)
-
-$(OUT): $(OBJ)
-	ld -r $(OBJ) -o $(OUT)
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6

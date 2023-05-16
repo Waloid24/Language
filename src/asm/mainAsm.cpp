@@ -1,53 +1,38 @@
-#include "generator.h"
+#include <stdio.h>
+#include "../common/readCode.h"
+#include "cpu.h"
+#include "asm.h"
+#include "../debug/MY_ASSERT.h"
 
-<<<<<<< HEAD
-int main (int argc, char * argv[])
-{
-    char * code = getCode (argv[1]);
-=======
 static char * nameWithPath (const char * path, char * nameFileWithoutDir);
+
+const int NUM_TAGS = 20;
 
 int main (int argc, char * argv[])
 {
     MY_ASSERT (argc < 5, "Too few argument in a command line, you need 5");
     MY_ASSERT (argc > 5, "Too many arguments in a command line, you need 5");
+    code_t codeInfo = {};
 
     char * nameSrcFile = nameWithPath ("./bin/", argv[2]);
-    char * code = getCode (nameSrcFile);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
-    char * tmpCode = code;
+    codeInfo = readCode (nameSrcFile);
 
-    node_t * node = createTree (&code);
-
-<<<<<<< HEAD
-    graphicDumpTree (node);
-
-    asmFormat (node, argv[2]);
-
-    graphicDumpTree (node);
-=======
     // int isRem = remove (nameSrcFile);
     // MY_ASSERT (isRem != 0, "Error deleting a file");
 
+    MY_ASSERT (codeInfo.nStrs == 0, "There are no lines of code in your program");
+
     char * nameDstFile = nameWithPath ("./bin/", argv[4]);
-    asmFormat (node, nameDstFile);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
+    pushSignature (nameDstFile, codeInfo);
 
-    deleteTree (node, true);
+    createBinFile (codeInfo.arrStrs, &codeInfo, nameDstFile, NUM_TAGS);
 
-    free (tmpCode);
-<<<<<<< HEAD
-=======
     free (nameSrcFile);
     free (nameDstFile);
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
-
+    
     return 0;
 }
 
-<<<<<<< HEAD
-
-=======
 static char * nameWithPath (const char * path, char * nameFileWithoutDir)
 {
     MY_ASSERT (path == nullptr, "No access to the file path");
@@ -64,4 +49,3 @@ static char * nameWithPath (const char * path, char * nameFileWithoutDir)
 
     return fullName;
 }
->>>>>>> d4782c371f2d454407b3c3f3da5c90962156a2c6
