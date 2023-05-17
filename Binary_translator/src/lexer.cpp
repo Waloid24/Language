@@ -6,53 +6,41 @@ const int RAM = 7; //0000 | 0001  -> 1000 | 0000
 const int REG = 6; //0000 | 0001  -> 0100 | 0000
 const int NUM = 5; //0000 | 0001  -> 0010 | 0000
 
-const int NUM_REGISTERS = 4;
+const int NUM_REGISTERS = 4;  
 
 const size_t MAX_RAM = 100;
 
-#define DEF_CMD(name, numCmd, ...)    \
-    CMD_##name = numCmd,
-
-typedef enum {
-    #include "cmd.h"
-} COMMANDS;
-
-#undef DEF_CMD
-
-#define JUMP_FORM(command)                          \
-    commandsArray[numCmds] = {                      \
-        .name           = #command,                 \
-        .cmd            = CMD_##command,            \
-        .nativeSize     = 2,                        \
-        .nativeIP       = i-1,                      \
-        .type_argument  = LABEL,                    \
-        .argument       = byteCode[i]               \
+#define JUMP_FORM(command)                              \
+    compilerInfo->irInfo.irArray[numCmds] = {                   \
+        .name           = #command,                     \
+        .cmd            = CMD_##command,                \
+        .nativeSize     = 2,                            \
+        .nativeIP       = i-1,                          \
+        .argument_type  = LABEL,                        \
+        .argument       = compilerInfo->byteCode.buf[i]  \
     };
 
 #define BOOL_EXPR(command)                          \
-    commandsArray[numCmds] = {                      \
+    compilerInfo->irInfo.irArray[numCmds] = {               \
         .name           = #command,                 \
         .cmd            = CMD_##command,            \
         .nativeSize     = 2,                        \
         .nativeIP       = i,                        \
-        .type_argument  = LABEL,                    \
-        .argument       = byteCode[i]               \
+        .argument_type  = LABEL                     \
     };
 
 static int checkBit(const int value, const int position);
 static int * createArrRegs (size_t numRegs);
 
-cmd_t * createIRArray (code_t code)
+void createIRArray (compilerInfo_t * compilerInfo)
 {
-    cmd_t * array = (cmd_t *) calloc (code.sizeBuf/sizeof(int), sizeof(cmd_t));
-    MY_ASSERT (array == nullptr, "Unable to allocate memory");
-
-    return array;
+    compilerInfo->irInfo.irArray = (ir_t *) calloc (compilerInfo->byteCode.sizeBuf/sizeof(int), sizeof(ir_t));
+    MY_ASSERT (compilerInfo->irInfo.irArray == nullptr, "Unable to allocate memory");
 }
 
-size_t setIR (cmd_t * commandsArray, int * byteCode)
+void fillIRArray (compilerInfo_t * compilerInfo)
 {
-    MY_ASSERT (commandsArray == nullptr, "There is no access to the array with code");
+    MY_ASSERT (compilerInfo->irInfo.irArray == nullptr, "There is no access to the array with code");
 
     int * regs = createArrRegs (NUM_REGISTERS);
     int cmd = -1;
@@ -66,34 +54,34 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
 
     for (size_t i = 0; ; i++, numCmds++)
     {
-        cmd = (byteCode[i] & MASK);
+        cmd = (compilerInfo->byteCode.buf[i] & MASK);
 
-        if ( (checkBit(byteCode[i], NUM) == 1) && 
-             (checkBit(byteCode[i], REG) == 0) && 
-             (checkBit(byteCode[i], RAM) == 0)) //push 7 / pop
+        if ( (checkBit(compilerInfo->byteCode.buf[i], NUM) == 1) && 
+             (checkBit(compilerInfo->byteCode.buf[i], REG) == 0) && 
+             (checkBit(compilerInfo->byteCode.buf[i], RAM) == 0)) //push 7 / pop
         {
             i++;
             if (cmd == CMD_PUSH)
             {
-                commandsArray[numCmds] = {
+                compilerInfo->irInfo.irArray[numCmds] = {
                     .name           = "push_num",
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
-                    .type_argument  = NUMBER,
-                    .argument       = byteCode[i]
+                    .argument_type  = NUMBER,
+                    .argument       = compilerInfo->byteCode.buf[i]
                 };
             }
             else if (cmd == CMD_POP)
             {
                 i++;
-                commandsArray[numCmds] = {
+                compilerInfo->irInfo.irArray[numCmds] = {
                     .name           = "pop_empty",
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
-                    .type_argument  = NUMBER,
-                    .argument       = byteCode[i]
+                    .argument_type  = NUMBER,
+                    .argument       = compilerInfo->byteCode.buf[i]
                 };
             }
             else
@@ -101,34 +89,34 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
                 MY_ASSERT (1, "Wrong command (section pushORpop_num)");
             }
         }
-        else if ((checkBit(byteCode[i], NUM) == 0) && 
-                 (checkBit(byteCode[i], REG) == 1) && 
-                 (checkBit(byteCode[i], RAM) == 0)) //push/pop rax
+        else if ((checkBit(compilerInfo->byteCode.buf[i], NUM) == 0) && 
+                 (checkBit(compilerInfo->byteCode.buf[i], REG) == 1) && 
+                 (checkBit(compilerInfo->byteCode.buf[i], RAM) == 0)) //push/pop rax
         {     
             i++;
-            int nReg = byteCode[i];    
+            int nReg = compilerInfo->byteCode.buf[i];    
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
 
             if (cmd == CMD_PUSH)
             {
-                commandsArray[numCmds] = {
+                compilerInfo->irInfo.irArray[numCmds] = {
                     .name           = "push_reg",
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
-                    .type_argument  = REGISTER,
-                    .argument       = byteCode[i]
+                    .argument_type  = REGISTER,
+                    .reg_type       = nReg
                 };
             }
             else if (cmd == CMD_POP)
             {
-                commandsArray[numCmds] = {
+                compilerInfo->irInfo.irArray[numCmds] = {
                     .name           = "pop_reg",
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
-                    .type_argument  = REGISTER,
-                    .argument       = byteCode[i]
+                    .argument_type  = REGISTER,
+                    .reg_type       = nReg
                 };
             }
             else
@@ -137,51 +125,52 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
             }
         }
         else if ((cmd == CMD_PUSH) && 
-                 (checkBit(byteCode[i], NUM) == 1) && 
-                 (checkBit(byteCode[i], REG) == 1) && 
-                 (checkBit(byteCode[i], RAM) == 0)) //push 5 + rax
+                 (checkBit(compilerInfo->byteCode.buf[i], NUM) == 1) && 
+                 (checkBit(compilerInfo->byteCode.buf[i], REG) == 1) && 
+                 (checkBit(compilerInfo->byteCode.buf[i], RAM) == 0)) //push 5 + rax
         {
             i++;
-            int nReg = byteCode[i];
+            int nReg = compilerInfo->byteCode.buf[i];
             printf ("nReg = %d, i = %zu\n", nReg, i);
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
             i++;
-            int tmp = regs[nReg] + byteCode[i];
-            commandsArray[numCmds] = {
+            int numIndex = compilerInfo->byteCode.buf[i];
+            compilerInfo->irInfo.irArray[numCmds] = {
                 .name           = "push_num_reg",
                 .cmd            = CMD_PUSH,
                 .nativeSize     = 3, 
                 .nativeIP       = i-2,
-                .type_argument  = NUM_REG,
-                .argument       = tmp
+                .argument_type  = NUM_REG,
+                .reg_type       = nReg,
+                .argument       = numIndex
             };
         }
-        else if ((checkBit(byteCode[i], NUM) == 1) && 
-                 (checkBit(byteCode[i], REG) == 0) && 
-                 (checkBit(byteCode[i], RAM) == 1)) // push/pop[10]
+        else if ((checkBit(compilerInfo->byteCode.buf[i], NUM) == 1) && 
+                 (checkBit(compilerInfo->byteCode.buf[i], REG) == 0) && 
+                 (checkBit(compilerInfo->byteCode.buf[i], RAM) == 1)) // push/pop[10]
         {
             i++;
-            int ramIndex = byteCode[i];
+            int ramIndex = compilerInfo->byteCode.buf[i];
             MY_ASSERT ((size_t) ramIndex > MAX_RAM-1, "You are out of RAM");
             if (cmd == CMD_PUSH)
             {
-                commandsArray[numCmds] = {
+                compilerInfo->irInfo.irArray[numCmds] = {
                     .name           = "push_num",
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
-                    .type_argument  = MEM_NUM,
+                    .argument_type  = MEM_NUM,
                     .argument       = ramIndex
                 }; 
             }
             else if (cmd == CMD_POP)
             {
-                commandsArray[numCmds] = {
+                compilerInfo->irInfo.irArray[numCmds] = {
                     .name           = "pop_num",
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
-                    .type_argument  = MEM_NUM,
+                    .argument_type  = MEM_NUM,
                     .argument       = ramIndex
                 }; 
             }
@@ -190,36 +179,34 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
                 MY_ASSERT (1, "Wrong command");
             }
         }
-        else if ((checkBit(byteCode[i], NUM) == 0) && 
-                 (checkBit(byteCode[i], REG) == 1) && 
-                 (checkBit(byteCode[i], RAM) == 1)) //push/pop[rcx]
+        else if ((checkBit(compilerInfo->byteCode.buf[i], NUM) == 0) && 
+                 (checkBit(compilerInfo->byteCode.buf[i], REG) == 1) && 
+                 (checkBit(compilerInfo->byteCode.buf[i], RAM) == 1)) //push/pop[rcx]
         {
             i++;
-            int nReg = byteCode[i];
+            int nReg = compilerInfo->byteCode.buf[i];
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
-            int ramIndex = regs[nReg];
-            MY_ASSERT ((size_t) ramIndex > MAX_RAM-1, "You are out of RAM");
 
             if (cmd == CMD_PUSH)
             {
-                commandsArray[numCmds] = {
+                compilerInfo->irInfo.irArray[numCmds] = {
                     .name           = "push_reg",
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
-                    .type_argument  = MEM_REG,
-                    .argument       = ramIndex
+                    .argument_type  = MEM_REG,
+                    .reg_type       = nReg
                 };
             }
             else if (cmd == CMD_POP)
             {
-                commandsArray[numCmds]  = {
+                compilerInfo->irInfo.irArray[numCmds]  = {
                     .name           = "pop_reg",
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
-                    .type_argument  = MEM_NUM,
-                    .argument       = ramIndex
+                    .argument_type  = MEM_REG,
+                    .reg_type       = nReg
                 }; 
             }
             else 
@@ -227,38 +214,38 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
                 MY_ASSERT (1, "Wrong command");
             }
         }
-        else if ((checkBit(byteCode[i], NUM) == 1) && 
-                (checkBit(byteCode[i], REG) == 1) && 
-                (checkBit(byteCode[i], RAM) == 1)) //push/pop [5 + rcx]
+        else if ((checkBit(compilerInfo->byteCode.buf[i], NUM) == 1) && 
+                (checkBit(compilerInfo->byteCode.buf[i], REG) == 1) && 
+                (checkBit(compilerInfo->byteCode.buf[i], RAM) == 1)) //push/pop [5 + rcx]
         {
             i++;
-            int nReg = byteCode[i];
+            int nReg = compilerInfo->byteCode.buf[i];
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
             i++;
-            int value1 = regs[nReg];
-            int value2 = byteCode[i];
-            int ramIndex = value1 + value2;
+            int ramIndex = compilerInfo->byteCode.buf[i];
             MY_ASSERT ((size_t) ramIndex > MAX_RAM-1, "You are out of RAM");
 
             if (cmd == CMD_PUSH)
             {
-                commandsArray[numCmds] = {
+                compilerInfo->irInfo.irArray[numCmds] = {
                     .name           = "push_mem_num_reg",
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 3,
                     .nativeIP       = i-2,
-                    .type_argument  = MEM_NUM_REG,
+                    .argument_type  = MEM_NUM_REG,
+                    .reg_type       = nReg,
                     .argument       = ramIndex
                 };
             }
             else if (cmd == CMD_POP)
             {
-                commandsArray[numCmds]  = {
+                compilerInfo->irInfo.irArray[numCmds]  = {
                     .name           = "pop_mem_num_reg",
                     .cmd            = CMD_POP,
                     .nativeSize     = 3,
                     .nativeIP       = i-2,
-                    .type_argument  = MEM_NUM_REG,
+                    .argument_type  = MEM_NUM_REG,
+                    .reg_type       = nReg,
                     .argument       = ramIndex
                 };
             }
@@ -270,18 +257,20 @@ size_t setIR (cmd_t * commandsArray, int * byteCode)
         else
 
 
-        #include "cmd.h"
+        #include "../include/cmd.hpp"
         
     
         {
-            printf ("cmd = %d, i = %zu, prevCmd = %s\n", cmd, i, commandsArray[i-2].name);
+            printf ("cmd = %d, i = %zu, prevCmd = %s\n", cmd, i, compilerInfo->irInfo.irArray[i-2].name);
             break;
         }
     }
 
     free (regs);
 
-    return numCmds;
+    compilerInfo->irInfo.sizeArray = numCmds;
+
+    return ;
 }
 
 static int checkBit(const int value, const int position) 

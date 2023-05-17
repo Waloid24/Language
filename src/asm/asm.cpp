@@ -24,16 +24,16 @@ enum {
     YES = 1
 };
 
-static void scanTag (char * src, char * dst, size_t lengthSrc);
-static int findFreePlace (tag_t * tags, int sizeArrTags);
-static long int findTag (tag_t * tags, char * argument, int * startArrWithCode, size_t numTags);
-static void ram (int ** code, char * firstBracket, int numCmd);
-static void no_ram (int ** code, char * strCode, int countLetters, int numCmd);
-static void getArg (int ** code, char * str_text_code, int countLetters, int numCmd, FILE * logfile);
-static void freeArrTags (tag_t * tags, freeCall_t * calls, size_t sizeArrTags);
-static int setbit (int value, int position);
-static char readNum (char * src, double * doubleNumDst, int * intNumDst);
-static void skipSpace (char ** strCode, int countLetters);
+static void     scanTag         (char * src, char * dst, size_t lengthSrc);
+static int      findFreePlace   (tag_t * tags, int sizeArrTags);
+static long int findTag         (tag_t * tags, char * argument, int * startArrWithCode, size_t numTags);
+static void     ram             (int ** code, char * firstBracket, int numCmd);
+static void     no_ram          (int ** code, char * strCode, int countLetters, int numCmd);
+static void     getArg          (int ** code, char * str_text_code, int countLetters, int numCmd, FILE * logfile);
+static void     freeArrTags     (tag_t * tags, freeCall_t * calls, size_t sizeArrTags);
+static int      setbit          (int value, int position);
+static char     readNum         (char * src, double * doubleNumDst, int * intNumDst);
+static void     skipSpace       (char ** strCode, int countLetters);
 
 void dumpCode (char ** arrStrs, int * code, size_t numElem)
 {
@@ -90,16 +90,15 @@ void createBinFile (char ** arrStrs, code_t * prog, char * nameBinFile, size_t n
             {                                                                   \
                 countArgs++;                                                    \
                 getArg (&code, arrStrs[i], countLetters, numCmd, logfile);      \
-                numCmdAndArgs++;\
                 code++;                                                         \
             }                                                                   \
             else                                                                \
             {                                                                   \
                 *code = CMD_##nameCmd;                                          \
-                numCmdAndArgs++;                                                \
                 code++;                                                         \
             }                                                                   \
-            fprintf (logfile, "code[%zu] = %d (%s)\n", numCmdAndArgs, *tmp1, arrStrs[i]);    \
+            fprintf (logfile, "code[%zu] = %d (%s)\n", numCmdAndArgs, *tmp1, arrStrs[i]);\
+            numCmdAndArgs++;                                                    \
             numCmdAndArgs++;                                                    \
             tmp1++;                                                             \
             for (; tmp1 != code; tmp1++, numCmdAndArgs++)                       \

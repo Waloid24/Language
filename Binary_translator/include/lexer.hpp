@@ -1,18 +1,30 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
 
-#include "../src/logs/logs.hpp"
 #include "processFileWithCode.hpp"
 #include <stdlib.h>
+
+#define DEF_CMD(name, numCmd, ...)    \
+    CMD_##name = numCmd,
+
+typedef enum {
+    #include "../include/cmd.hpp"
+    CMD_MOV,
+    CMD_TRASH
+} COMMANDS;
+
+#undef DEF_CMD
 
 typedef enum argument {
     NUMBER      = 1,
     REGISTER    = 2,
     NUM_REG     = 3,
-    MEM_NUM     = 4,
-    MEM_REG     = 5,
-    MEM_NUM_REG = 6,
-    LABEL
+    REG_NUM     = 4, 
+    MEM_NUM     = 5,
+    MEM_REG     = 6,
+    MEM_NUM_REG = 7,
+    MEM_REG_NUM = 8,
+    LABEL       = 9
 } argument_t;
 
 typedef struct command {
@@ -21,12 +33,29 @@ typedef struct command {
     int cmd;
     int nativeSize;
     size_t nativeIP;
-    argument_t type_argument;
+    argument_t argument_type;
+    int reg_type;
     int argument;
 
-} cmd_t;
+} ir_t;
 
-cmd_t * createIRArray (code_t code);
-size_t setIR (cmd_t * commandsArray, int * byteCode);
+typedef struct irInfo {
+
+    ir_t * irArray;
+    size_t sizeArray;
+
+} irInfo_t;
+
+typedef struct JIT_CompilerInfo {
+
+    code_t byteCode;
+    code_t machineCode;
+
+    irInfo_t irInfo;
+
+} compilerInfo_t;
+
+void createIRArray  (compilerInfo_t * compilerInfo);
+void fillIRArray    (compilerInfo_t * compilerInfofo);
 
 #endif

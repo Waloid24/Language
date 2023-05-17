@@ -14,9 +14,9 @@
 
 enum {
     RAX = 0,
-    RBX = 1,
-    RCX = 2,
-    RDX = 3
+    RCX = 1,
+    RDX = 2,
+    RBX = 3
 };
 
 struct tag {

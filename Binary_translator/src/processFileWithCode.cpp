@@ -24,23 +24,12 @@ static size_t readNumStrs (FILE * binFile)
     return (size_t)nStrs;
 }
 
-static FILE * openFile(const char * nameFile, const char * format)
-{
-    MY_ASSERT (nameFile == nullptr, "Wrong pointer to name file with source code");
-
-    FILE *file = fopen (nameFile, format);
-    MY_ASSERT (file == nullptr, "Unable to open the source file");
-    setbuf (file, NULL);
-
-    return file;
-}
-
 static void writeTextToBuf (code_t * code, FILE * codeFile)
 {
     MY_ASSERT (code == nullptr, "There is no access to the struct with the necessary information");
     MY_ASSERT (codeFile == nullptr, "There is no access to the code file");
 
-    code->buf = calloc (code->sizeBuf, sizeof(char));
+    code->buf = (int *) calloc (code->sizeBuf, sizeof(char));
     MY_ASSERT (code->buf == nullptr, "Unable to allocate new memory");
 
     fread (code->buf, sizeof(char), code->sizeBuf,  codeFile);

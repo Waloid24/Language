@@ -9,7 +9,7 @@
 struct codeInfo
 {
     size_t sizeBuf;
-    void * buf;
+    int * buf;
     size_t nStrs;
 };
 typedef struct codeInfo code_t;

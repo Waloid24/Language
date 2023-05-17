@@ -41,6 +41,11 @@ src: | $(OBJDIR) $(DESTDIR) $(LOGDIR) $(GRAPHDIR)
 run:
 	./bin/main asmResult.bin
 
+asm:
+	nasm -f elf64 commands.asm -o commands.o
+	ld commands.o -o commands
+	./commands
+
 clean:
 	rm -r $(DESTDIR) $(OBJDIR) $(LOGDIR) $(GRAPHDIR)
 

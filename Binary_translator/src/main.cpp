@@ -1,23 +1,42 @@
-#include "../include/processFileWithCode.hpp"
 #include "../include/lexer.hpp"
+#include "../include/translateCommand.hpp"
+#include "../include/optimizer.hpp"
+#include "../include/translateCommand.hpp"
 #include <string.h>
 
-void graphvizDumpIR (cmd_t * commandsArray, size_t numElem);
+void graphvizDumpIR (compilerInfo_t compilerInfo);
+void dumpCode       (compilerInfo_t * compilerInfo);
 
 int main (int argc, char * argv[])
 {
     MY_ASSERT (argc != 2, "You should enter 2 arguments: executable file and bytecode file");
-    code_t code = readCode (argv[1]);
 
-    dumpCode ((int *) code.buf, code.sizeBuf/sizeof(int));
+    compilerInfo_t compilerInfo = {};
 
-    cmd_t * commandsArray = createIRArray (code);
+    compilerInfo.byteCode = readCode (argv[1]);
 
-    size_t numCmds = setIR (commandsArray, (int *) code.buf);
-    printf ("numCmds = %zu\n", numCmds);
-    graphvizDumpIR (commandsArray, numCmds);
+    dumpCode        (&compilerInfo);
 
-    free (code.buf);
+    createIRArray   (&compilerInfo);
+
+    fillIRArray     (&compilerInfo);
+
+    printf ("numCmds = %zu\n", compilerInfo.irInfo.sizeArray);
+
+    if (compilerInfo.irInfo.sizeArray == 0)
+    {
+        printf ("You send an empty file\n");
+        free (compilerInfo.byteCode.buf);
+        return 0;
+    }
+
+    // optimizeIR (&compilerInfo);
+
+    graphvizDumpIR (compilerInfo);
+
+    JITCompile (&compilerInfo);
+
+    free (compilerInfo.byteCode.buf);
 
     return 0;
 }
@@ -44,9 +63,9 @@ static int isPushPop (int cmd)
     return 0;
 }
 
-void graphvizDumpIR (cmd_t * commandsArray, size_t numElem) 
+void graphvizDumpIR (compilerInfo_t compilerInfo) 
 {
-    MY_ASSERT (commandsArray == nullptr, "");
+    MY_ASSERT (compilerInfo.irInfo.irArray == nullptr, "There is no access to the commands array");
 
     FILE* IRdumpFile = fopen("./graph/ir_dump.dot", "w");
     MY_ASSERT (IRdumpFile == nullptr, "Unable to open the file");
@@ -55,22 +74,59 @@ void graphvizDumpIR (cmd_t * commandsArray, size_t numElem)
     dumpline("rankdir=LR;\n");
     dumpline("node [ shape=record ];\n");
 
-    for (size_t i = 0; i < numElem; i++) 
+    size_t sizeArr = compilerInfo.irInfo.sizeArray;
+
+    for (size_t i = 0; i < sizeArr; i++) 
     {
-        const char* name = commandsArray[i].name;
-        if (commandsArray[i].cmd != 0)
+        const char* name = compilerInfo.irInfo.irArray[i].name;
+        if (compilerInfo.irInfo.irArray[i].cmd != 0)
         {
-            if (isJump(commandsArray[i].cmd)) 
+            if (compilerInfo.irInfo.irArray[i].cmd == CMD_TRASH)
             {
-                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"cyan\" \n];\n", i, i, commandsArray[i].nativeIP, name, commandsArray[i].nativeSize, commandsArray[i].argument);
+                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<name>name: %s\", style = \"filled\", fillcolor = \"red\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].name);
             }
-            else if (isPushPop(commandsArray[i].cmd)) 
+            else if (isJump(compilerInfo.irInfo.irArray[i].cmd)) 
             {
-                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, commandsArray[i].nativeIP, commandsArray[i].name, commandsArray[i].nativeSize, commandsArray[i].argument);
+                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"cyan\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument);
+            }
+            else if (isPushPop(compilerInfo.irInfo.irArray[i].cmd)) 
+            {
+                if (compilerInfo.irInfo.irArray[i].argument_type == NUMBER)
+                {
+                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument);
+                }
+                else if (compilerInfo.irInfo.irArray[i].argument_type == MEM_NUM)
+                {
+                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument [MEM]: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument);
+                }
+                else if (compilerInfo.irInfo.irArray[i].argument_type == MEM_REG)
+                {
+                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<reg_arg> reg [MEM]: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].reg_type);
+                }
+                else if (compilerInfo.irInfo.irArray[i].argument_type == REGISTER)
+                {
+                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<reg_arg> reg: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].reg_type);
+                }
+                else if (compilerInfo.irInfo.irArray[i].argument_type == NUM_REG)
+                {
+                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d|<reg_arg> reg: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument, compilerInfo.irInfo.irArray[i].reg_type);
+                }
+                else if (compilerInfo.irInfo.irArray[i].argument_type == MEM_NUM_REG)
+                {
+                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument [MEM]: %d|<reg_arg> reg [MEM]: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument, compilerInfo.irInfo.irArray[i].reg_type);
+                }
+                else 
+                {
+                    MY_ASSERT (1, "Error type of push/pop");
+                }
+            }
+            else if (compilerInfo.irInfo.irArray[i].cmd == CMD_MOV)
+            {
+                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d|<reg_arg> reg: %d\", style = \"filled\", fillcolor = \"yellow\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument, compilerInfo.irInfo.irArray[i].reg_type);
             }
             else 
             {
-                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"gray\" \n];\n", i, i, commandsArray[i].nativeIP, commandsArray[i].name, commandsArray[i].nativeSize, commandsArray[i].argument);
+                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"gray\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument);
             }
             if (i == 0)
             {
@@ -90,3 +146,17 @@ void graphvizDumpIR (cmd_t * commandsArray, size_t numElem)
     system(cmd);
 }
 
+void dumpCode (compilerInfo_t * compilerInfo)
+{
+    FILE * logfile = openFile ("./logs/logCpu.txt", "a");
+
+    fprintf (logfile, "\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n");
+
+    for (size_t i = 0; i < compilerInfo->byteCode.sizeBuf/sizeof(int); i++)
+    {
+        fprintf (logfile, "code[%zu] = %d\n", i, (compilerInfo->byteCode.buf)[i]);
+    }
+
+    fprintf (logfile, "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n");
+    fclose (logfile);
+}

@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/andrei/Рабочий стол/Informatic/ISP/Scielang/asm",
-      "program": "/home/andrei/Рабочий стол/Informatic/ISP/Scielang/asm/build/Debug/outDebug",
+      "cwd": "/home/andrei/desktop/Informatic/HI/Scielang/src/asm",
+      "program": "/home/andrei/desktop/Informatic/HI/Scielang/src/asm/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
