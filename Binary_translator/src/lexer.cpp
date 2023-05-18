@@ -94,7 +94,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                  (checkBit(compilerInfo->byteCode.buf[i], RAM) == 0)) //push/pop rax
         {     
             i++;
-            int nReg = compilerInfo->byteCode.buf[i];    
+            char nReg = compilerInfo->byteCode.buf[i];    
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
 
             if (cmd == CMD_PUSH)
@@ -130,7 +130,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                  (checkBit(compilerInfo->byteCode.buf[i], RAM) == 0)) //push 5 + rax
         {
             i++;
-            int nReg = compilerInfo->byteCode.buf[i];
+            char nReg = compilerInfo->byteCode.buf[i];
             printf ("nReg = %d, i = %zu\n", nReg, i);
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
             i++;
@@ -151,7 +151,9 @@ void fillIRArray (compilerInfo_t * compilerInfo)
         {
             i++;
             int ramIndex = compilerInfo->byteCode.buf[i];
-            MY_ASSERT ((size_t) ramIndex > MAX_RAM-1, "You are out of RAM");
+            MY_ASSERT (ramIndex > MAX_RAM-1, "You are out of RAM");
+            MY_ASSERT (ramIndex < 0, "ramIndex < 0")
+
             if (cmd == CMD_PUSH)
             {
                 compilerInfo->irInfo.irArray[numCmds] = {
@@ -184,7 +186,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                  (checkBit(compilerInfo->byteCode.buf[i], RAM) == 1)) //push/pop[rcx]
         {
             i++;
-            int nReg = compilerInfo->byteCode.buf[i];
+            char nReg = compilerInfo->byteCode.buf[i];
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
 
             if (cmd == CMD_PUSH)
@@ -219,7 +221,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                 (checkBit(compilerInfo->byteCode.buf[i], RAM) == 1)) //push/pop [5 + rcx]
         {
             i++;
-            int nReg = compilerInfo->byteCode.buf[i];
+            char nReg = compilerInfo->byteCode.buf[i];
             MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
             i++;
             int ramIndex = compilerInfo->byteCode.buf[i];

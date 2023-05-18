@@ -8,6 +8,7 @@
     CMD_##name = numCmd,
 
 typedef enum {
+    BAD_CMD = 0,
     #include "../include/cmd.hpp"
     CMD_MOV,
     CMD_TRASH
@@ -29,13 +30,13 @@ typedef enum argument {
 
 typedef struct command {
 
-    const char * name;
-    int cmd;
-    int nativeSize;
-    size_t nativeIP;
-    argument_t argument_type;
-    int reg_type;
-    int argument;
+    const char* name;
+    int         cmd;
+    int         nativeSize;
+    size_t      nativeIP;
+    argument_t  argument_type;
+    char   reg_type;
+    int64_t     argument;
 
 } ir_t;
 
@@ -53,9 +54,11 @@ typedef struct JIT_CompilerInfo {
 
     irInfo_t irInfo;
 
+    char * x86_memory_buf;
+
 } compilerInfo_t;
 
 void createIRArray  (compilerInfo_t * compilerInfo);
-void fillIRArray    (compilerInfo_t * compilerInfofo);
+void fillIRArray    (compilerInfo_t * compilerInfo);
 
 #endif

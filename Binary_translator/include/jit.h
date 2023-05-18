@@ -4,80 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// #include "../../CPU/includes/masks.h"
-
-const int CMD_MASK = 31; /*11111*/
-
-#define DEF_CMD(name, num, args, ...) name = num, 
-
-// enum CmdEnum {
-
-//     #include "../../CPU/includes/cmd.h"
-
-// };
-
-#undef DEF_CMD
-
-typedef struct ir_command {
-
-    const char* name;
-    int nativeNum;
-    int hasArgs;
-
-    size_t nativeIp;
-    int nativeSize;
-    int x86_Size;
-
-    size_t SPECIAL_ARG;           // if cmd is push/pop - stores the arg type
-                                  // if cmd is jump of any sort - stores next ip  
-
-} ir_command; 
-
-typedef struct arg_t {
-
-    int isMem;
-    union {
-        u_int32_t offset;
-        u_int64_t immedArg;
-    };
-
-} arg_t;
-
-typedef struct x86CMDarr_T {
-
-    x86Snippet* x86codeSnippets;
-    size_t x86CmdCt;
-
-    size_t curIndex;
-    u_int64_t* x86BinaryCode;
-    u_int32_t* memorySegment; 
-
-} x86CMDarr_T;
-
-typedef struct x86Snippet {
-
-    u_int64_t x86code;
-    int x86Size; 
-
-    const char* name;
-    int hasArg;
-
-    arg_t x86arg;
-
-} x86Snippet;
-
-
-typedef struct IR_HEAD_T {
-
-    size_t nativeCmdCt;
-    int* byteCode;
-    ir_command* ir_StructArr;
-    size_t currentIp; 
-    size_t currentIndex;
-
-} IR_HEAD_T; 
-
-
 enum CMD_TYPES {
 
     IMMED = ARG_IMMED,
@@ -135,7 +61,7 @@ enum X86_CMD : u_int64_t {
             sqrtpd(xmm0)            // 4
             mul xmm0, xmm1          // 4
             cvtsi2sd rax, xmm0      // 5
-        */
+    */
 
     CVTSI2SD_XMM0_RAX = 0xc02a0f48f2,   // mov xmm0, rax
     CVTSD2SI_RAX_XMM0 = 0xc02d0f48f2,   // mov rax, xmm0
@@ -160,7 +86,7 @@ enum X86_CMD : u_int64_t {
 
 
 enum x86_Commands_Size {
-    SIZE_MOV_REG_IMMED = 1,
+    SIZE_MOV_REG_IMMED = 2,
     SIZE_MOV_REG_REG = 3,
     SIZE_MOV_REG_R15_OFFSET = 3,
     SIZE_MOV_R15_OFFSET_REG = 3,

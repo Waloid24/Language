@@ -2,6 +2,13 @@
 #define TRANSLATE_COMMAND_HPP
 
 #include "lexer.hpp"
+#include <string.h>
+#include <stdio.h>
+
+typedef struct opcode {
+    size_t size;
+    u_int64_t code;
+} opcode_t;
 
 void JITCompile (compilerInfo_t * compilerInfo);
 
@@ -109,6 +116,14 @@ enum REG_MASK {
     RBP,
     RSI,
     RDI,
+    R8,
+    R9, 
+    R10,
+    R11,
+    R12, 
+    R13,
+    R14,
+    R15
 };
 
 enum COND_JMPS {

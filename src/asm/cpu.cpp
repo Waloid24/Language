@@ -191,7 +191,8 @@ void cpu (int * code, size_t nStrs, size_t numTags, FILE * binFile)
         {
             i++;
             int ramIndex = code[i];
-            MY_ASSERT ((size_t) ramIndex > MAX_RAM-1, "You are out of RAM");
+            MY_ASSERT (ramIndex > MAX_RAM-1, "You are out of RAM");
+            MY_ASSERT (ramIndex < 0, "ramIndex < 0");
             if (cmd == CMD_PUSH)
             {
                 stack_push (&stk, ram[ramIndex], logfile);

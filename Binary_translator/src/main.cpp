@@ -87,17 +87,17 @@ void graphvizDumpIR (compilerInfo_t compilerInfo)
             }
             else if (isJump(compilerInfo.irInfo.irArray[i].cmd)) 
             {
-                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"cyan\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument);
+                dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %ld\", style = \"filled\", fillcolor = \"cyan\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument);
             }
             else if (isPushPop(compilerInfo.irInfo.irArray[i].cmd)) 
             {
                 if (compilerInfo.irInfo.irArray[i].argument_type == NUMBER)
                 {
-                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument);
+                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %ld\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument);
                 }
                 else if (compilerInfo.irInfo.irArray[i].argument_type == MEM_NUM)
                 {
-                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument [MEM]: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument);
+                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument [MEM]: %ld\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument);
                 }
                 else if (compilerInfo.irInfo.irArray[i].argument_type == MEM_REG)
                 {
@@ -109,11 +109,11 @@ void graphvizDumpIR (compilerInfo_t compilerInfo)
                 }
                 else if (compilerInfo.irInfo.irArray[i].argument_type == NUM_REG)
                 {
-                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %d|<reg_arg> reg: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument, compilerInfo.irInfo.irArray[i].reg_type);
+                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument: %ld|<reg_arg> reg: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument, compilerInfo.irInfo.irArray[i].reg_type);
                 }
                 else if (compilerInfo.irInfo.irArray[i].argument_type == MEM_NUM_REG)
                 {
-                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument [MEM]: %d|<reg_arg> reg [MEM]: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument, compilerInfo.irInfo.irArray[i].reg_type);
+                    dumpline("struct%zu [\nlabel = \"<index> index: %zu|<ip>ip: %zu|<name>name: %s|<size> size(native): %d|<arg> argument [MEM]: %ld|<reg_arg> reg [MEM]: %d\", style = \"filled\", fillcolor = \"green\" \n];\n", i, i, compilerInfo.irInfo.irArray[i].nativeIP, compilerInfo.irInfo.irArray[i].name, compilerInfo.irInfo.irArray[i].nativeSize, compilerInfo.irInfo.irArray[i].argument, compilerInfo.irInfo.irArray[i].reg_type);
                 }
                 else 
                 {
