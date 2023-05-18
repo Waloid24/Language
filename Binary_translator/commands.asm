@@ -1,10 +1,14 @@
-global _start
 
 section .text
+global _start
+global main
+extern printf
 
 buf: times 128 db 0
+printf_buf: db "mul = %ld", 10, 0
 
-_start:
+main:
+; _start:
     ; mov rax, buf
     ; mov rcx, buf
     ; mov rdx, buf
@@ -22,22 +26,36 @@ _start:
     ; mov r14, buf
     ; mov r15, buf
 
-    push QWORD [r15 + 0]
-    push QWORD [r15 + 1]
-    push QWORD [r15 + 2]
-    push QWORD [r15 + 3]
-    push QWORD [r15 + 4]
-    push QWORD [r15 + 5]
-    push QWORD [r15 + 6]
-    push QWORD [r15 + 7]
-    push QWORD [r15 + 8]
-    push QWORD [r15 + 9]
-    push QWORD [r15 + 10]
-    push QWORD [r15 + 257]
-    push QWORD [r15 + 34563342]
-    push QWORD [r15 + 345633428]
+;     push rax
+;     push rsi
+;     push rdi
+
+    pop rax
+    cvtsi2sd xmm1, rax
+    
+    pop rax
+    cvtsi2sd xmm0, rax
+
+    mov rax, 1000
+    cvtsi2sd xmm2, rax
+
+    divpd xmm0, xmm1
+    mulpd xmm0, xmm2
 
 
+    cvtsd2si rax, xmm0
+    push rax
+;     mov rdi, printf_buf
+;     xor rax, rax
+;     call printf
+
+;     pop rdi
+;     pop rsi
+;     pop rax
+
+
+
+    
     mov rax, 0x3C		;exit64(rdi)
     xor rdi, rdi
     syscall

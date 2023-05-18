@@ -9,11 +9,18 @@
 struct codeInfo
 {
     size_t sizeBuf;
-    char * buf;
-    size_t len;
+    int * buf;
     size_t nStrs;
 };
 typedef struct codeInfo code_t;
+
+struct codeInfo_x86
+{
+    size_t sizeBuf;
+    char * buf;
+    size_t len;
+};
+typedef struct codeInfo_x86 x86code_t;
 
 code_t readCode (const char * nameFile);
 

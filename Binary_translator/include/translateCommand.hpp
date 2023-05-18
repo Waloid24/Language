@@ -61,9 +61,13 @@ enum X86_CMD : u_int64_t {
     CVTSI2SD_XMM0_RAX = 0xc02a0f48f2,   // mov xmm0, rax
     CVTSD2SI_RAX_XMM0 = 0xc02d0f48f2,   // mov rax, xmm0
     CVTSI2SD_XMM1_RAX = 0xc82a0f48f2,   // mov xmm1, rax
+    CVTSI2SD_XMM2_RAX = 0xd02a0f48f2,
 
-    DIVPD_XMM0_XMM1 = 0xc15e0f66,       // xmm0/xmm1 -> xmm0
-    MULPD_XMM0_XMM1 = 0xc1590f66,       // xmm0*xmm1 -> xmm0
+    DIVPD_XMM0_XMM0 = 0xc05e0f66,       // xmm0/xmm0 -> xmm0
+                                        // first reg - "|" with shifted by 27 REG_MASK, second reg - "|" with shifted by 24 REG_MASK
+
+    MULPD_XMM0_XMM0 = 0xc0590f66,       // xmm0*xmm0 -> xmm0
+                                        // first reg - "|" with shifted by 27 REG_MASK, second reg - "|" with shifted by 24 REG_MASK
 
     SQRTPD_XMM0_XMM0 = 0xc0510f66,      // sqrt(xmm0) -> xmm0 
 
@@ -95,16 +99,19 @@ enum x86_Commands_Size {
     SIZE_CQO = 2,
     SIZE_IDIV_REG = 3,
     SIZE_CVTSI2SD_XMM0_RAX = 5,
+    SIZE_CVTSI2SD_XMM1_RAX = 5,
+    SIZE_CVTSI2SD_XMM2_RAX = 5,
     SIZE_CVTSD2SI_RAX_XMM0 = 5,
     SIZE_SQRTPD_XMM0_XMM0 = 4,
-    SIZE_DIVPD_XMM0_XMM1 = 4,
-    SIZE_MULPD_XMM0_XMM1 = 4,
-    SIZE_CVTSI2SD_XMM1_RAX = 5,
+    SIZE_DIVPD_XMM0_XMM0 = 4,
+    SIZE_MULPD_XMM0_XMM0 = 4,
     SIZE_x86_RET = 1,
     SIZE_x86_JMP = 1,
     SIZE_x86_COND_JMP = 2,
     SIZE_x86_CALL = 1,
     SIZE_CMP_REG_REG = 3,
+    SIZE_NUM = 8,
+    SIZE_REL_PTR = 4
 };
 
 enum REG_MASK {
@@ -123,8 +130,12 @@ enum REG_MASK {
     R12, 
     R13,
     R14,
-    R15
+    R15,
+    XMM0 = 0,
+    XMM1,
+    XMM2
 };
+
 
 enum COND_JMPS {
     JE_MASK = 0x84,

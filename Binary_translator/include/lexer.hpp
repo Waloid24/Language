@@ -34,8 +34,9 @@ typedef struct command {
     int         cmd;
     int         nativeSize;
     size_t      nativeIP;
+    size_t      x86ip;
     argument_t  argument_type;
-    char   reg_type;
+    char        reg_type;
     int64_t     argument;
 
 } ir_t;
@@ -50,7 +51,7 @@ typedef struct irInfo {
 typedef struct JIT_CompilerInfo {
 
     code_t byteCode;
-    code_t machineCode;
+    x86code_t machineCode;
 
     irInfo_t irInfo;
 

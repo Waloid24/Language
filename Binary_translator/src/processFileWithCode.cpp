@@ -29,7 +29,7 @@ static void writeTextToBuf (code_t * code, FILE * codeFile)
     MY_ASSERT (code == nullptr, "There is no access to the struct with the necessary information");
     MY_ASSERT (codeFile == nullptr, "There is no access to the code file");
 
-    code->buf = (char *) calloc (code->sizeBuf, sizeof(char));
+    code->buf = (int *) calloc (code->sizeBuf, sizeof(char));
     MY_ASSERT (code->buf == nullptr, "Unable to allocate new memory");
 
     fread (code->buf, sizeof(char), code->sizeBuf,  codeFile);
@@ -44,6 +44,7 @@ code_t readCode (const char * nameFile)
     FILE * codeFile = openFile (nameFile, "r");
 
     fileInfo.nStrs = readNumStrs (codeFile);
+    printf ("fileInfo.nStrs = %zu\n", fileInfo.nStrs);
     writeTextToBuf (&fileInfo, codeFile);
 
     fclose (codeFile);

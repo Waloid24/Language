@@ -34,7 +34,7 @@ int main (int argc, char * argv[])
 
     graphvizDumpIR (compilerInfo);
 
-    JITCompile (&compilerInfo);
+    // JITCompile (&compilerInfo);
 
     free (compilerInfo.byteCode.buf);
 

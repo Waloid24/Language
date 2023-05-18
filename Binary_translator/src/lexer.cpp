@@ -1,4 +1,5 @@
 #include "../include/lexer.hpp"
+#include "../include/translateCommand.hpp"
 
 const int MASK = (1<<4) + (1<<3) + (1<<2) + (1<<1) + 1; //0001|1111
 
@@ -45,7 +46,8 @@ void fillIRArray (compilerInfo_t * compilerInfo)
     int * regs = createArrRegs (NUM_REGISTERS);
     int cmd = -1;
 
-    size_t numCmds = 0;
+    size_t numCmds  = 0;
+    size_t x86ip    = 0;
 
     #define DEF_CMD(nameCmd, numCmd, isArg, ...)            \
     if (cmd == CMD_##nameCmd)                               \
@@ -68,26 +70,29 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
+                    .x86ip          = x86ip,
                     .argument_type  = NUMBER,
                     .argument       = compilerInfo->byteCode.buf[i]
                 };
             }
             else if (cmd == CMD_POP)
             {
-                i++;
-                compilerInfo->irInfo.irArray[numCmds] = {
-                    .name           = "pop_empty",
-                    .cmd            = CMD_POP,
-                    .nativeSize     = 2,
-                    .nativeIP       = i-1,
-                    .argument_type  = NUMBER,
-                    .argument       = compilerInfo->byteCode.buf[i]
-                };
+                // i++;
+                // compilerInfo->irInfo.irArray[numCmds] = {
+                //     .name           = "pop_empty",
+                //     .cmd            = CMD_POP,
+                //     .nativeSize     = 2,
+                //     .nativeIP       = i-1,
+                //     .argument_type  = NUMBER,
+                //     .argument       = compilerInfo->byteCode.buf[i]
+                // };
+                MY_ASSERT (1, "Incorrect command pop num")
             }
             else
             {
                 MY_ASSERT (1, "Wrong command (section pushORpop_num)");
             }
+            x86ip += SIZE_MOV_REG_IMMED + SIZE_NUM + SIZE_PUSH_REG;
         }
         else if ((checkBit(compilerInfo->byteCode.buf[i], NUM) == 0) && 
                  (checkBit(compilerInfo->byteCode.buf[i], REG) == 1) && 
@@ -104,6 +109,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
+                    .x86ip          = x86ip,
                     .argument_type  = REGISTER,
                     .reg_type       = nReg
                 };
@@ -115,6 +121,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
+                    .x86ip          = x86ip,
                     .argument_type  = REGISTER,
                     .reg_type       = nReg
                 };
@@ -123,6 +130,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
             {
                 MY_ASSERT (1, "Wrong command");
             }
+            x86ip += SIZE_PUSH_REG;
         }
         else if ((cmd == CMD_PUSH) && 
                  (checkBit(compilerInfo->byteCode.buf[i], NUM) == 1) && 
@@ -140,10 +148,12 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                 .cmd            = CMD_PUSH,
                 .nativeSize     = 3, 
                 .nativeIP       = i-2,
+                .x86ip          = x86ip,
                 .argument_type  = NUM_REG,
                 .reg_type       = nReg,
                 .argument       = numIndex
             };
+            x86ip += SIZE_MOV_REG_IMMED + SIZE_NUM + SIZE_ADD_REG_REG + SIZE_PUSH_REG;
         }
         else if ((checkBit(compilerInfo->byteCode.buf[i], NUM) == 1) && 
                  (checkBit(compilerInfo->byteCode.buf[i], REG) == 0) && 
@@ -161,6 +171,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
+                    .x86ip          = x86ip,
                     .argument_type  = MEM_NUM,
                     .argument       = ramIndex
                 }; 
@@ -172,6 +183,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
+                    .x86ip          = x86ip,
                     .argument_type  = MEM_NUM,
                     .argument       = ramIndex
                 }; 
@@ -180,6 +192,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
             {
                 MY_ASSERT (1, "Wrong command");
             }
+            x86ip += SIZE_PUSH_R15_OFFSET + SIZE_REL_PTR;
         }
         else if ((checkBit(compilerInfo->byteCode.buf[i], NUM) == 0) && 
                  (checkBit(compilerInfo->byteCode.buf[i], REG) == 1) && 
@@ -196,6 +209,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
+                    .x86ip          = x86ip,
                     .argument_type  = MEM_REG,
                     .reg_type       = nReg
                 };
@@ -207,6 +221,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                     .cmd            = CMD_POP,
                     .nativeSize     = 2,
                     .nativeIP       = i-1,
+                    .x86ip          = x86ip,
                     .argument_type  = MEM_REG,
                     .reg_type       = nReg
                 }; 
@@ -215,6 +230,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
             {
                 MY_ASSERT (1, "Wrong command");
             }
+            x86ip += SIZE_PUSH_REG + SIZE_ADD_REG_REG + SIZE_PUSH_R15_OFFSET + SIZE_REL_PTR + SIZE_POP_REG;
         }
         else if ((checkBit(compilerInfo->byteCode.buf[i], NUM) == 1) && 
                 (checkBit(compilerInfo->byteCode.buf[i], REG) == 1) && 
@@ -234,6 +250,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                     .cmd            = CMD_PUSH,
                     .nativeSize     = 3,
                     .nativeIP       = i-2,
+                    .x86ip          = x86ip,
                     .argument_type  = MEM_NUM_REG,
                     .reg_type       = nReg,
                     .argument       = ramIndex
@@ -246,6 +263,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
                     .cmd            = CMD_POP,
                     .nativeSize     = 3,
                     .nativeIP       = i-2,
+                    .x86ip          = x86ip,
                     .argument_type  = MEM_NUM_REG,
                     .reg_type       = nReg,
                     .argument       = ramIndex
@@ -255,6 +273,7 @@ void fillIRArray (compilerInfo_t * compilerInfo)
             {
                 MY_ASSERT (1, "Wrong command");
             }
+            x86ip += SIZE_PUSH_REG + SIZE_ADD_REG_REG + SIZE_POP_R15_OFFSET + SIZE_REL_PTR + SIZE_POP_REG;
         }
         else
 
