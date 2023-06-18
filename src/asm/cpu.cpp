@@ -1,4 +1,5 @@
 #include "cpu.h"
+#define NDEBUG
 
 #define JUMP_FORM(sign)                             \
     i++;                                            \
@@ -109,7 +110,7 @@ void cpu (int * code, size_t nStrs, size_t numTags, FILE * binFile)
     
     size_t STANDART_SIZE_CODE = nStrs * 3;
 
-    dumpCode (code, nStrs * 3);
+    // dumpCode (code, nStrs * 3);
 
     stack_t callStack = {};
     stk_ctor (&callStack, numTags, "callStk");
@@ -127,151 +128,159 @@ void cpu (int * code, size_t nStrs, size_t numTags, FILE * binFile)
         __VA_ARGS__                                         \
     else
 
-    for (size_t i = 0; ; i++)
-    {
-        if (i >= STANDART_SIZE_CODE)
+    // clock_t begin = clock ();
+    // for (int i = 0; i < 1000000; i++)
+    // {
+        for (size_t i = 0; ; i++)
         {
-            code = increaseMemSize (code, STANDART_SIZE_CODE, binFile);
-        }
-        cmd = (code[i] & MASK);
-        if ((checkBit(code[i], NUM) == 1) && 
-            (checkBit(code[i], REG) == 0) && 
-            (checkBit(code[i], RAM) == 0)) //push 7 / pop
-        {
-            i++;
-            if (cmd == CMD_PUSH)
+            if (i >= STANDART_SIZE_CODE)
             {
-                stack_push (&stk, code[i], logfile);
+                code = increaseMemSize (code, STANDART_SIZE_CODE, binFile);
             }
-            else if (cmd == CMD_POP)
-            {
-                stack_pop (&stk, logfile);
-            }
-            else 
-            {
-                MY_ASSERT (1, "Wrong command");
-            }
-        }
-        else if ((checkBit(code[i], NUM) == 0) && 
-                (checkBit(code[i], REG) == 1) && 
-                (checkBit(code[i], RAM) == 0)) //push/pop rax
-        {     
-            i++;
-            int nReg = code[i];
-            MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
-
-            if (cmd == CMD_PUSH)
-            {
-                stack_push (&stk, regs[nReg], logfile);
-            }
-            else if (cmd == CMD_POP)
-            {
-                regs[nReg] = stack_pop (&stk, logfile);
-            }
-            else 
-            {
-                MY_ASSERT (1, "Wrong command");
-            }
-        }
-        else if ((cmd == CMD_PUSH) && 
-                (checkBit(code[i], NUM) == 1) && 
-                (checkBit(code[i], REG) == 1) && 
-                (checkBit(code[i], RAM) == 0)) //push 5 + rax
-        {
-            i++;
-            int nReg = code[i];
-            MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
-            i++;
-            int tmp = regs[nReg] + code[i];
-            stack_push (&stk, tmp, logfile);
-        }
-        else if ((checkBit(code[i], NUM) == 1) && 
+            cmd = (code[i] & MASK);
+            if ((checkBit(code[i], NUM) == 1) && 
                 (checkBit(code[i], REG) == 0) && 
-                (checkBit(code[i], RAM) == 1)) // push/pop[10]
-        {
-            i++;
-            int ramIndex = code[i];
-            MY_ASSERT (ramIndex > MAX_RAM-1, "You are out of RAM");
-            MY_ASSERT (ramIndex < 0, "ramIndex < 0");
-            if (cmd == CMD_PUSH)
+                (checkBit(code[i], RAM) == 0)) //push 7 / pop
             {
-                stack_push (&stk, ram[ramIndex], logfile);
+                i++;
+                if (cmd == CMD_PUSH)
+                {
+                    stack_push (&stk, code[i], logfile);
+                }
+                else if (cmd == CMD_POP)
+                {
+                    stack_pop (&stk, logfile);
+                }
+                else 
+                {
+                    MY_ASSERT (1, "Wrong command");
+                }
             }
-            else if (cmd == CMD_POP)
-            {
-                ram[ramIndex] = stack_pop (&stk, logfile);
-            }
-            else 
-            {
-                MY_ASSERT (1, "Wrong command");
-            }
-        }
-        else if ((checkBit(code[i], NUM) == 0) && 
-                (checkBit(code[i], REG) == 1) && 
-                (checkBit(code[i], RAM) == 1)) //push/pop[rcx]
-        {
-            i++;
-            int nReg = code[i];
-            MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
-            int ramIndex = regs[nReg];
-            MY_ASSERT ((size_t) ramIndex > MAX_RAM-1, "You are out of RAM");
+            else if ((checkBit(code[i], NUM) == 0) && 
+                    (checkBit(code[i], REG) == 1) && 
+                    (checkBit(code[i], RAM) == 0)) //push/pop rax
+            {     
+                i++;
+                int nReg = code[i];
+                MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
 
-            if (cmd == CMD_PUSH)
-            {
-                stack_push (&stk, ram[ramIndex], logfile);
+                if (cmd == CMD_PUSH)
+                {
+                    stack_push (&stk, regs[nReg], logfile);
+                }
+                else if (cmd == CMD_POP)
+                {
+                    regs[nReg] = stack_pop (&stk, logfile);
+                }
+                else 
+                {
+                    MY_ASSERT (1, "Wrong command");
+                }
             }
-            else if (cmd == CMD_POP)
+            else if ((cmd == CMD_PUSH) && 
+                    (checkBit(code[i], NUM) == 1) && 
+                    (checkBit(code[i], REG) == 1) && 
+                    (checkBit(code[i], RAM) == 0)) //push 5 + rax
             {
-                ram[ramIndex] = stack_pop (&stk, logfile);
+                i++;
+                int nReg = code[i];
+                MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
+                i++;
+                int tmp = regs[nReg] + code[i];
+                stack_push (&stk, tmp, logfile);
             }
-            else 
+            else if ((checkBit(code[i], NUM) == 1) && 
+                    (checkBit(code[i], REG) == 0) && 
+                    (checkBit(code[i], RAM) == 1)) // push/pop[10]
             {
-                MY_ASSERT (1, "Wrong command");
+                i++;
+                int ramIndex = code[i];
+                MY_ASSERT (ramIndex > MAX_RAM-1, "You are out of RAM");
+                MY_ASSERT (ramIndex < 0, "ramIndex < 0");
+                if (cmd == CMD_PUSH)
+                {
+                    stack_push (&stk, ram[ramIndex], logfile);
+                }
+                else if (cmd == CMD_POP)
+                {
+                    ram[ramIndex] = stack_pop (&stk, logfile);
+                }
+                else 
+                {
+                    MY_ASSERT (1, "Wrong command");
+                }
             }
-        }
-        else if ((checkBit(code[i], NUM) == 1) && 
-                (checkBit(code[i], REG) == 1) && 
-                (checkBit(code[i], RAM) == 1)) //push/pop [5 + rcx]
-        {
-            i++;
-            int nReg = code[i];
-            MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
-            i++;
-            int value1 = regs[nReg];
-            int value2 = code[i];
-            int ramIndex = value1 + value2;
-            MY_ASSERT ((size_t) ramIndex > MAX_RAM-1, "You are out of RAM");
+            else if ((checkBit(code[i], NUM) == 0) && 
+                    (checkBit(code[i], REG) == 1) && 
+                    (checkBit(code[i], RAM) == 1)) //push/pop[rcx]
+            {
+                i++;
+                int nReg = code[i];
+                MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
+                int ramIndex = regs[nReg];
+                MY_ASSERT ((size_t) ramIndex > MAX_RAM-1, "You are out of RAM");
 
-            if (cmd == CMD_PUSH)
-            {
-                stack_push (&stk, ram[ramIndex], logfile);
+                if (cmd == CMD_PUSH)
+                {
+                    stack_push (&stk, ram[ramIndex], logfile);
+                }
+                else if (cmd == CMD_POP)
+                {
+                    ram[ramIndex] = stack_pop (&stk, logfile);
+                }
+                else 
+                {
+                    MY_ASSERT (1, "Wrong command");
+                }
             }
-            else if (cmd == CMD_POP)
+            else if ((checkBit(code[i], NUM) == 1) && 
+                    (checkBit(code[i], REG) == 1) && 
+                    (checkBit(code[i], RAM) == 1)) //push/pop [5 + rcx]
             {
-                ram[ramIndex] = stack_pop (&stk, logfile);
+                i++;
+                int nReg = code[i];
+                MY_ASSERT (nReg > NUM_REGISTERS-1, "You are out of register memory");
+                i++;
+                int value1 = regs[nReg];
+                int value2 = code[i];
+                int ramIndex = value1 + value2;
+                MY_ASSERT ((size_t) ramIndex > MAX_RAM-1, "You are out of RAM");
+
+                if (cmd == CMD_PUSH)
+                {
+                    stack_push (&stk, ram[ramIndex], logfile);
+                }
+                else if (cmd == CMD_POP)
+                {
+                    ram[ramIndex] = stack_pop (&stk, logfile);
+                }
+                else 
+                {
+                    MY_ASSERT (1, "Wrong command");
+                }
             }
-            else 
-            {
-                MY_ASSERT (1, "Wrong command");
-            }
-        }
-        else
+            else
 
 
-        #include "cmd.h"
+            #include "cmd.h"
+            
         
-    
-        {
-            break;
+            {
+                break;
+            }
         }
-    }
+
+    // }
+    // clock_t end = clock ();
+    // printf ("Elapsed time(secs): %lf\n", (double)(end - begin) / CLOCKS_PER_SEC);
 
     stack_dtor (&stk);
     stack_dtor (&callStack);
 
     free (regs);
     free (code);
-    fclose(logfile);
+    fclose (logfile);
+    fclose (logCallStack);
 }
 
 static int getNum (void)

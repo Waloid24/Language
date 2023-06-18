@@ -33,8 +33,6 @@ salve
     cruciatus
     salve
         D assignare b mul b subtrahere 4 mul a mul c ora
-        print aurora D umbra ora
-        print aurora -b umbra ora
 
         inceptus aurora D == 0 umbra
         salve

@@ -1,0 +1,6 @@
+main aurora umbra
+salve
+    a assignare 155 ora
+    print aurora a umbra ora
+    reditum 0 ora
+vale

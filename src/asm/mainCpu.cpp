@@ -1,5 +1,6 @@
 #include "cpu.h"
 
+
 static char * nameWithPath (const char * path, char * nameFileWithoutDir);
 
 int main (int argc, char * argv[])
@@ -13,7 +14,10 @@ int main (int argc, char * argv[])
 
     int * code = getCode (nStrs, binFile);
 
-    cpu (code, nStrs, MAX_RAM, binFile);
+    
+        cpu (code, nStrs, MAX_RAM, binFile);
+
+    
 
     free (nameSrcFile);
     fclose (binFile);

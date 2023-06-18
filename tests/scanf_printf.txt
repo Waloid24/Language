@@ -1,0 +1,10 @@
+main aurora umbra
+salve
+    a assignare 0 ora
+
+    scan aurora a umbra ora
+    print aurora a umbra ora
+
+    reditum 0 ora
+vale
+

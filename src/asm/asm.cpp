@@ -99,13 +99,11 @@ void createBinFile (char ** arrStrs, code_t * prog, char * nameBinFile, size_t n
             }                                                                   \
             fprintf (logfile, "code[%zu] = %d (%s)\n", numCmdAndArgs, *tmp1, arrStrs[i]);\
             numCmdAndArgs++;                                                    \
-            numCmdAndArgs++;                                                    \
             tmp1++;                                                             \
             for (; tmp1 != code; tmp1++, numCmdAndArgs++)                       \
             {                                                                   \
                 fprintf (logfile, "code[%zu] = %d\n", numCmdAndArgs, *tmp1);    \
             }                                                                   \
-            numCmdAndArgs--;                                                    \
         }                                                                       \
         else 
 
@@ -115,7 +113,7 @@ void createBinFile (char ** arrStrs, code_t * prog, char * nameBinFile, size_t n
             countArgs++;                                                        \
             *code = CMD_##nameJmp;                                              \
             fprintf (logfile, "code[%zu] = %d (%s)\n", numCmdAndArgs, *code, arrStrs[i]);   \
-            numCmdAndArgs++;\
+            numCmdAndArgs++;                                                    \
             code++;                                                             \
                                                                                 \
             skipSpace (&(arrStrs[i]), length);                                  \
@@ -128,6 +126,8 @@ void createBinFile (char ** arrStrs, code_t * prog, char * nameBinFile, size_t n
             tagCallOrJmps = findTag (tags, nameTag, tmp, numTags);              \
             if (tagCallOrJmps == NO_TAGS)                                       \
             {                                                                   \
+                fprintf (logfile, "code[%zu] = %s\n", numCmdAndArgs, "label below");\
+                numCmdAndArgs++;                                                \
                 missingTags->ptrToArrWithCode = code;                           \
                 missingTags->tag = nameTag;                                     \
                 N_FUNC_WITHOUT_ARG++;                                           \

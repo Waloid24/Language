@@ -49,6 +49,7 @@ static void filledFile (node_t * node, FILE * asmFile, var_t ** tableGlobVars)
             printAsm ("jmp end_%s:;\n", node->left->left->name);
             printAsm ("%s:;\n", node->left->left->name);
         }
+
         processDefineParams (node->left->right, asmFile, tableGlobVars, &tableLocalVars, &numVars);
         processFuncBody (node->right, asmFile, tableGlobVars, &tableLocalVars, &numVars);
 
@@ -351,11 +352,11 @@ static void processExpr (node_t * node, FILE * asmFile, var_t ** tableGlobVars, 
                 {
                     if (toStack == true)
                     {
-                        printAsm ("push [rbx + %zu];\n", (*tableGlobVars)[i].num);
+                        printAsm ("push [rax + %zu];\n", (*tableGlobVars)[i].num);
                     }
                     else
                     {
-                        printAsm ("pop [rbx + %zu];\n", (*tableGlobVars)[i].num);
+                        printAsm ("pop [rax + %zu];\n", (*tableGlobVars)[i].num);
                     }
                     isVarInTable = true;
                     break;

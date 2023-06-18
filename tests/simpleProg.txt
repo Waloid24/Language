@@ -1,0 +1,16 @@
+SOME_NUMBER assignare 5 ora
+
+main aurora umbra
+salve
+    some_func aurora umbra ora
+    reditum 0 ora
+vale
+
+<you can't declare SOME_NUMBER here! Only at the very beginning of the program>
+
+some_func aurora umbra
+salve
+    print aurora SOME_NUMBER umbra ora
+    reditum 0 ora
+vale
+

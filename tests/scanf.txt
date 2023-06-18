@@ -1,0 +1,7 @@
+main aurora umbra
+salve
+    a assignare 155 ora
+    scan aurora a umbra ora
+    reditum 0 ora
+vale
+

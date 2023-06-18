@@ -21,7 +21,7 @@ export CXXFLAGS 	:= -mavx -mavx2 -g --static-pie -std=c++14 -fmax-errors=100 \
 -fsanitize=nonnull-attribute -fsanitize=null -fsanitize=object-size \
 -fsanitize=return -fsanitize=returns-nonnull-attribute -fsanitize=shift \
 -fsanitize=signed-integer-overflow -fsanitize=undefined \
--fsanitize=unreachable -fsanitize=vla-bound -fsanitize=vptr -lm -pie
+-fsanitize=unreachable -fsanitize=vla-bound -fsanitize=vptr -lm -pie -O2
 
 export DESTDIR		:= $(CURDIR)/bin
 export OBJDIR		:= $(CURDIR)/obj
@@ -58,8 +58,8 @@ cpu: | $(OBJDIR) $(DESTDIR) $(LOGCALLDIR) $(LOGCPUDIR)
 run:
 	./bin/frontend --- $(filter-out $@,$(MAKECMDGOALS)) --- frontResult.txt
 	./bin/backend --- frontResult.txt --- backResult.txt
-	./bin/asm --- backResult.txt --- asmResult.bin
-	./bin/cpu --- asmResult.bin
+	./bin/asm --- backResult.txt --- result.bin
+	./bin/cpu --- result.bin
 
 clean:
 	rm -r $(DESTDIR) $(OBJDIR) $(LOGDIR)

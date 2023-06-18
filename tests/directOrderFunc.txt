@@ -1,0 +1,19 @@
+main aurora umbra
+salve
+    a assignare 0 ora
+    b assignare factorial aurora a umbra ora
+    reditum 0 ora
+vale
+
+factorial aurora num umbra
+salve
+    a assignare 5 ora
+    nextFunc aurora a umbra ora
+    reditum a ora
+vale
+
+nextFunc aurora num umbra
+salve
+    a assignare 10 ora
+    reditum a ora
+vale

@@ -14,6 +14,7 @@ salve
     inceptus aurora a >= 0 umbra
     salve
         b assignare factorial aurora a umbra ora
+        print aurora b umbra ora
     vale
     cruciatus
     salve
@@ -21,3 +22,4 @@ salve
     vale
     reditum 0 ora
 vale
+

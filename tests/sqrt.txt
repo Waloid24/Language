@@ -1,0 +1,15 @@
+main aurora umbra
+salve
+    a assignare 10 ora
+    b assignare 20 ora
+    D assignare 25 ora
+    x1 assignare sqrt aurora D umbra ora
+
+    b assignare 10 partem 2 ora
+    D assignare 2 mul 2 ora
+
+    a assignare 1 subtrahere 1 ora
+    b assignare 8 crescere 1 ora
+
+    reditum x1 ora
+vale

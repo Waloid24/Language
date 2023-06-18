@@ -1,4 +1,5 @@
 #define DEBUG_STK
+#define NDEBUG
 #define LONG_LINE "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n"
 #include "stack.h"
 

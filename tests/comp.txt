@@ -1,0 +1,13 @@
+main aurora umbra
+salve
+    a assignare 5 ora
+    inceptus aurora a >= 6 umbra
+    salve
+        print aurora a umbra ora
+    vale
+    cruciatus
+    salve
+        print aurora 2 umbra ora
+    vale
+    reditum 0 ora
+vale
