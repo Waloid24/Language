@@ -24,7 +24,7 @@ The project consists of 4 parts:
 
 The intermediate representation in the AST-tree format allows you to do *cross compilation* with those languages that support the same standard.
 
-> 4-ый пункт можно заменить на [JIT-компиляцию](./jit/README.md), которая сильно ускоряет выполнение программы.
+> The 4th point can be replaced with [JIT compilation](./jit/README.md), which greatly speeds up the execution of the program.
 
 ## Build
 
